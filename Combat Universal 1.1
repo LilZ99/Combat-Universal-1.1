@@ -1,0 +1,1251 @@
+if _G._FlowKill then pcall(_G._FlowKill) end
+
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Teams = game:GetService("Teams")
+local UIS = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
+local Cam = workspace.CurrentCamera
+
+for _,n in ipairs({"Flow_Loading","Flow_V90","Flow_VN","Elysium_VR"}) do
+    local f = CoreGui:FindFirstChild(n)
+    if f then f:Destroy() end
+end
+
+local function NT(t) return TweenInfo.new(t or 0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out) end
+local function Tw(o,p,t) TS:Create(o,NT(t),p):Play() end
+
+local LoadGui = Instance.new("ScreenGui",CoreGui)
+LoadGui.Name = "Flow_Loading"
+LoadGui.IgnoreGuiInset = true
+LoadGui.DisplayOrder = 999
+
+local LBG = Instance.new("Frame",LoadGui)
+LBG.Size = UDim2.new(1,0,1,0)
+LBG.BackgroundColor3 = Color3.fromRGB(4,2,2)
+LBG.BorderSizePixel = 0
+local g1 = Instance.new("UIGradient",LBG)
+g1.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(25,5,5)),
+    ColorSequenceKeypoint.new(0.5,Color3.fromRGB(10,3,3)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(4,1,1))}
+g1.Rotation = 135
+
+local Pattern = Instance.new("ImageLabel",LBG)
+Pattern.Size = UDim2.new(1,0,1,0)
+Pattern.BackgroundTransparency = 1
+Pattern.Image = "rbxassetid://1095708"
+Pattern.ImageTransparency = 0.95
+Pattern.ImageColor3 = Color3.fromRGB(120,20,20)
+
+local Center = Instance.new("Frame",LBG)
+Center.Size = UDim2.new(0,400,0,260)
+Center.Position = UDim2.new(0.5,-200,0.5,-130)
+Center.BackgroundColor3 = Color3.fromRGB(15,8,8)
+Center.BorderSizePixel = 0
+Center.BackgroundTransparency = 0.1
+Instance.new("UICorner",Center).CornerRadius = UDim.new(0,18)
+local cStroke = Instance.new("UIStroke",Center)
+cStroke.Color = Color3.fromRGB(218,37,29)
+cStroke.Thickness = 2
+cStroke.Transparency = 0.3
+local cGrad = Instance.new("UIGradient",Center)
+cGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(35,15,15)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(10,4,4))}
+cGrad.Rotation = 160
+
+local FlagLeft = Instance.new("Frame",Center)
+FlagLeft.Size = UDim2.new(0,40,0,90)
+FlagLeft.Position = UDim2.new(0,18,0,22)
+FlagLeft.BackgroundColor3 = Color3.fromRGB(188,0,0)
+FlagLeft.BorderSizePixel = 0
+Instance.new("UICorner",FlagLeft).CornerRadius = UDim.new(0,6)
+local fGradL = Instance.new("UIGradient",FlagLeft)
+fGradL.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(220,0,0)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(140,0,0))}
+fGradL.Rotation = 90
+local StarL = Instance.new("TextLabel",FlagLeft)
+StarL.Size = UDim2.new(1,0,1,0)
+StarL.BackgroundTransparency = 1
+StarL.Text = "★"
+StarL.TextColor3 = Color3.fromRGB(255,215,0)
+StarL.Font = Enum.Font.GothamBold
+StarL.TextSize = 40
+
+local FlagRight = FlagLeft:Clone()
+FlagRight.Parent = Center
+FlagRight.Position = UDim2.new(1,-58,0,22)
+local fGradR = FlagRight:FindFirstChildOfClass("UIGradient")
+if fGradR then fGradR.Rotation = -90 end
+
+local Title = Instance.new("TextLabel",Center)
+Title.Size = UDim2.new(1,-120,0,26)
+Title.Position = UDim2.new(0,60,0,30)
+Title.BackgroundTransparency = 1
+Title.Text = "FLOW • RỒNG VIỆT"
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 20
+Title.TextColor3 = Color3.fromRGB(255,215,0)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextTransparency = 1
+
+local Sub = Instance.new("TextLabel",Center)
+Sub.Size = UDim2.new(1,-120,0,18)
+Sub.Position = UDim2.new(0,60,0,60)
+Sub.BackgroundTransparency = 1
+Sub.Text = "ESP + HITBOX • Thuật toán quan sát đa điểm"
+Sub.Font = Enum.Font.GothamMedium
+Sub.TextSize = 11
+Sub.TextColor3 = Color3.fromRGB(255,200,170)
+Sub.TextXAlignment = Enum.TextXAlignment.Left
+Sub.TextTransparency = 1
+
+local Quote = Instance.new("TextLabel",Center)
+Quote.Size = UDim2.new(1,-40,0,32)
+Quote.Position = UDim2.new(0,20,0,92)
+Quote.BackgroundTransparency = 1
+Quote.Text = "\"Không có gì quý hơn độc lập, tự do\""
+Quote.Font = Enum.Font.Gotham
+Quote.TextSize = 11
+Quote.TextColor3 = Color3.fromRGB(210,170,140)
+Quote.TextWrapped = true
+Quote.TextTransparency = 1
+
+local Nation = Instance.new("TextLabel",Center)
+Nation.Size = UDim2.new(1,-40,0,18)
+Nation.Position = UDim2.new(0,20,0,118)
+Nation.BackgroundTransparency = 1
+Nation.Text = "Việt Nam • Đoàn kết • Kỷ luật • Sáng tạo"
+Nation.Font = Enum.Font.GothamMedium
+Nation.TextSize = 10
+Nation.TextColor3 = Color3.fromRGB(220,80,80)
+Nation.TextTransparency = 1
+
+local Status = Instance.new("TextLabel",Center)
+Status.Size = UDim2.new(1,-40,0,18)
+Status.Position = UDim2.new(0,20,0,152)
+Status.BackgroundTransparency = 1
+Status.Text = "Đang khởi động..."
+Status.Font = Enum.Font.Gotham
+Status.TextSize = 11
+Status.TextColor3 = Color3.fromRGB(190,190,190)
+Status.TextTransparency = 1
+
+local BarBG = Instance.new("Frame",Center)
+BarBG.Size = UDim2.new(0.84,0,0,10)
+BarBG.Position = UDim2.new(0.08,0,0,180)
+BarBG.BackgroundColor3 = Color3.fromRGB(40,20,20)
+BarBG.BorderSizePixel = 0
+Instance.new("UICorner",BarBG).CornerRadius = UDim.new(1,0)
+local bSt = Instance.new("UIStroke",BarBG)
+bSt.Color = Color3.fromRGB(90,40,40)
+bSt.Thickness = 1.2
+
+local BarFill = Instance.new("Frame",BarBG)
+BarFill.Size = UDim2.new(0,0,1,0)
+BarFill.BackgroundColor3 = Color3.fromRGB(218,37,29)
+BarFill.BorderSizePixel = 0
+Instance.new("UICorner",BarFill).CornerRadius = UDim.new(1,0)
+local bGrad = Instance.new("UIGradient",BarFill)
+bGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(218,37,29)),
+    ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,120,50)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(255,215,0))}
+bGrad.Rotation = 0
+
+local Pct = Instance.new("TextLabel",Center)
+Pct.Size = UDim2.new(0.84,0,0,18)
+Pct.Position = UDim2.new(0.08,0,0,200)
+Pct.BackgroundTransparency = 1
+Pct.Text = "0%"
+Pct.Font = Enum.Font.GothamBold
+Pct.TextSize = 12
+Pct.TextColor3 = Color3.fromRGB(255,215,0)
+Pct.TextTransparency = 1
+
+local Timeline = {
+    {p=0,t="Đang khởi động hệ thống..."},
+    {p=14,t="Quét cấu trúc game, thu thập mẫu..."},
+    {p=28,t="Xây đồ thị tầm nhìn (Ray Graph)..."},
+    {p=42,t="Học trọng số Threat từ đa nguồn..."},
+    {p=56,t="Cân bằng hiệu năng • bước thời gian..."},
+    {p=70,t="Bố trí giao diện phong cách Việt Nam..."},
+    {p=84,t="Nạp ESP đa tầng • chuẩn bị hitbox..."},
+    {p=100,t="Hoàn tất — Chúc bạn bắn như thần!"}
+}
+
+task.spawn(function()
+    task.wait(0.2)
+    Tw(StarL,{TextColor3=Color3.fromRGB(255,240,120)},0.6)
+    Tw(Title,{TextTransparency=0},0.5)
+    task.wait(0.15)
+    Tw(Sub,{TextTransparency=0},0.45)
+    task.wait(0.1)
+    Tw(Quote,{TextTransparency=0},0.4)
+    task.wait(0.05)
+    Tw(Nation,{TextTransparency=0},0.4)
+    task.wait(0.05)
+    Tw(Status,{TextTransparency=0},0.35)
+    Tw(Pct,{TextTransparency=0},0.35)
+    
+    task.spawn(function()
+        while StarL.Parent do
+            Tw(StarL,{TextSize=110},0.8)
+            task.wait(0.8)
+            Tw(StarL,{TextSize=100},0.8)
+            task.wait(0.8)
+        end
+    end)
+    
+    local total = 3.4
+    local stepT = total/#Timeline
+    for _,st in ipairs(Timeline) do
+        Status.Text = st.t
+        Pct.Text = st.p.."%"
+        Tw(BarFill,{Size=UDim2.new(st.p/100,0,1,0)},stepT*0.9)
+        if st.p==50 then
+            Tw(cStroke,{Color=Color3.fromRGB(255,215,0)},0.25)
+            task.wait(0.2)
+            Tw(cStroke,{Color=Color3.fromRGB(218,37,29)},0.25)
+        end
+        task.wait(stepT)
+    end
+    
+    task.wait(0.3)
+    local Flash = Instance.new("Frame",LBG)
+    Flash.Size = UDim2.new(1,0,1,0)
+    Flash.BackgroundColor3 = Color3.new(1,1,1)
+    Flash.BackgroundTransparency = 1
+    Flash.ZIndex = 50
+    Tw(Flash,{BackgroundTransparency=0.7},0.15)
+    task.wait(0.15)
+    Tw(Flash,{BackgroundTransparency=1},0.3)
+    
+    task.wait(0.2)
+    Tw(Center,{BackgroundTransparency=1},0.45)
+    Tw(cStroke,{Transparency=1},0.45)
+    Tw(LBG,{BackgroundTransparency=1},0.5)
+    for _,d in ipairs(Center:GetDescendants()) do
+        if d:IsA("TextLabel") then Tw(d,{TextTransparency=1},0.35)
+        elseif d:IsA("Frame") then Tw(d,{BackgroundTransparency=1},0.35)
+        elseif d:IsA("UIStroke") then Tw(d,{Transparency=1},0.35) end
+    end
+    task.wait(0.6)
+    LoadGui:Destroy()
+end)
+
+task.wait(5.2)
+
+local Theme2 = {
+    Primary = Color3.fromRGB(218, 37, 29),
+    Secondary = Color3.fromRGB(255, 203, 5),
+    Accent = Color3.fromRGB(255, 140, 0),
+    Glass = Color3.fromRGB(12, 8, 8),
+    GlassLight = Color3.fromRGB(22, 15, 15),
+    GlassBorder = Color3.fromRGB(55, 30, 30),
+    Success = Color3.fromRGB(34, 197, 94),
+    Warning = Color3.fromRGB(251, 191, 36),
+    Danger = Color3.fromRGB(239, 68, 68),
+    Text = Color3.fromRGB(250, 245, 240),
+    TextMuted = Color3.fromRGB(140, 120, 110),
+}
+
+local Cfg = {
+    TargetAll = false,
+    Team = {},
+    HB = {On=false,Size=15,Trans=0.5,Wall=false,MaxD=350},
+    ESP = {
+        On=false,Fade=true,
+        NearD=50,FarD=1000,MaxD=2500,
+        Trans=0.2,
+        HL=true,Name=true,Dist=true,HP=true,
+        Wpn=true,Threat=true,Status=true
+    }
+}
+
+local HeadBak, Shadows, HBViz, ESPViz, PData, HBState = {},{},{},{},{},{}
+local Conns = {}
+local StaggerIdx = 0
+local VR = Instance.new("Folder",CoreGui); VR.Name="Elysium_VR"
+
+local function MyRoot()
+    local c=LP.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
+
+local function GetDist(root)
+    local mr=MyRoot()
+    if not mr or not root then return 9999 end
+    return (mr.Position-root.Position).Magnitude
+end
+
+local function HpColor(r)
+    r=math.clamp(r,0,1)
+    if r>0.5 then return Color3.fromRGB(math.floor((1-(r-.5)*2)*255),255,0)
+    else return Color3.fromRGB(255,math.floor(r*2*220),0) end
+end
+
+local THREAT_KEYS={"want","crim","bount","jail","prison","murder","kill","rob","hostile","enemy","attack"}
+local SAFE_KEYS={"safe","spawn","lobby","protect","shield","immune","peace","nopvp"}
+local WPN_KEYS={"gun","pistol","rifle","shotgun","sword","knife","weapon","sniper","smg","revolver","ak","m4","rpg","grenade"}
+
+local function Match(str,keys)
+    str=str:lower()
+    for _,k in ipairs(keys) do if str:find(k) then return true,k end end
+    return false
+end
+
+local function IsWpnTool(tool)
+    if not tool then return false end
+    return Match(tool.Name,WPN_KEYS)
+end
+
+local function IsSafeZoned(p)
+    local c=p.Character
+    if not c then return false end
+    if c:FindFirstChildOfClass("ForceField") then return true end
+    for _,inst in ipairs({p,c}) do
+        for name,val in pairs(inst:GetAttributes()) do
+            if Match(name,SAFE_KEYS) and (val==true or (type(val)=="number" and val>0)) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function ScoreThreat(p)
+    local c=p.Character
+    if not c then return 0,{} end
+    local hum=c:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health<=0 then return 0,{} end
+    if IsSafeZoned(p) then return -100,{"🛡"} end
+    local score,reasons=0,{}
+    local ls=p:FindFirstChild("leaderstats")
+    if ls then
+        for _,v in ipairs(ls:GetChildren()) do
+            if v:IsA("ValueBase") then
+                local hit,k=Match(v.Name,THREAT_KEYS)
+                if hit then
+                    if (v:IsA("NumberValue") or v:IsA("IntValue")) and v.Value>0 then
+                        score=score+40 table.insert(reasons,k)
+                    elseif v:IsA("BoolValue") and v.Value then
+                        score=score+40 table.insert(reasons,k)
+                    end
+                end
+            end
+        end
+    end
+    local tool=c:FindFirstChildOfClass("Tool")
+    if tool and IsWpnTool(tool) then score=score+35 table.insert(reasons,"🔫") end
+    return score,reasons
+end
+
+local function ShouldTarget(p,pd)
+    if p==LP then return false end
+    if Cfg.TargetAll then return true end
+    local key=p.Team and p.Team.Name or "__N__"
+    local d=Cfg.Team[key] or Cfg.Team["__N__"]
+    if not d then return false end
+    if d.Mode==0 then return false end
+    if d.Mode==1 then return true end
+    if d.Mode==2 then return (pd.score or 0)>=25 end
+    return false
+end
+
+local function CanSeeTarget(char)
+    if not Cfg.HB.Wall then return true end
+    local root=char:FindFirstChild("HumanoidRootPart")
+    local head=char:FindFirstChild("Head")
+    local torso=char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+    if not root then return true end
+    local camPos=Cam.CFrame.Position
+    local myChar=LP.Character
+    local filterList={char}
+    if myChar then table.insert(filterList,myChar) end
+    for _,acc in ipairs(char:GetDescendants()) do
+        if acc:IsA("Accessory") or acc:IsA("Hat") then table.insert(filterList,acc) end
+    end
+    local params=RaycastParams.new()
+    params.FilterType=Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances=filterList
+    params.IgnoreWater=true
+    local pts={}
+    table.insert(pts,root.Position)
+    table.insert(pts,root.Position+Vector3.new(0,1.5,0))
+    table.insert(pts,root.Position+Vector3.new(0,-1,0))
+    table.insert(pts,root.Position+Vector3.new(1,0,0))
+    table.insert(pts,root.Position+Vector3.new(-1,0,0))
+    table.insert(pts,root.Position+Vector3.new(0,0,1))
+    table.insert(pts,root.Position+Vector3.new(0,0,-1))
+    if head then
+        table.insert(pts,head.Position)
+        table.insert(pts,head.Position+Vector3.new(0,0.5,0))
+    end
+    if torso then
+        table.insert(pts,torso.Position)
+        table.insert(pts,torso.Position+Vector3.new(0.5,0,0))
+        table.insert(pts,torso.Position+Vector3.new(-0.5,0,0))
+    end
+    for _,pos in ipairs(pts) do
+        local dir=pos-camPos
+        local dist=dir.Magnitude
+        if dist>0 and dist<1500 then
+            local result=workspace:Raycast(camPos,dir.Unit*dist,params)
+            if not result then return true end
+            if result.Instance and result.Instance:IsDescendantOf(char) then return true end
+            if result.Instance and result.Instance.Transparency>=0.5 then return true end
+        end
+    end
+    return false
+end
+
+local function GetPD(uid)
+    if not PData[uid] then
+        PData[uid]={
+            t=0,tT=0,tV=0,alive=false,target=false,
+            hbOn=false,espOn=false,inside=false,
+            dist=9999,score=0,reasons={},
+            canSee=true,lastSeen=tick()
+        }
+    end
+    return PData[uid]
+end
+
+local function UpdatePD(p,now)
+    local uid=p.UserId
+    local pd=GetPD(uid)
+    if (now-pd.t)<0.1 then return pd,false end
+    pd.t=now
+    local c=p.Character
+    local hum=c and c:FindFirstChildOfClass("Humanoid")
+    pd.alive=c and hum and hum.Health>0
+    if not pd.alive then
+        pd.target=false pd.hbOn=false pd.espOn=false
+        return pd,true
+    end
+    local root=c:FindFirstChild("HumanoidRootPart")
+    pd.dist=GetDist(root)
+    if (now-pd.tT)>=0.5 then
+        pd.tT=now
+        local ok,s,r=pcall(ScoreThreat,p)
+        pd.score=ok and s or 0
+        pd.reasons=ok and r or {}
+    end
+    pd.target=ShouldTarget(p,pd)
+    if Cfg.HB.Wall then
+        if (now-pd.tV)>=0.15 then
+            pd.tV=now
+            local seen=CanSeeTarget(c)
+            if seen then pd.lastSeen=now pd.canSee=true else pd.canSee=(now-pd.lastSeen)<0.5 end
+        end
+    else
+        pd.canSee=true
+        pd.lastSeen=now
+    end
+    pd.inside=root and pd.dist<(Cfg.HB.Size/2)
+    pd.hbOn=Cfg.HB.On and pd.target and pd.canSee and pd.dist<=Cfg.HB.MaxD
+    pd.espOn=Cfg.ESP.On and pd.target and pd.dist<=Cfg.ESP.MaxD
+    return pd,true
+end
+
+local function ForceRecalc()
+    local now=tick()
+    for _,pd in pairs(PData) do
+        pd.t=0 pd.tT=0 pd.tV=0 pd.lastSeen=now pd.canSee=true
+    end
+end
+
+local function SaveHead(uid,head)
+    if not HeadBak[uid] then
+        HeadBak[uid]={Size=head.Size,Trans=head.Transparency,Col=head.CanCollide,Que=head.CanQuery,Mas=head.Massless}
+    end
+end
+
+local function RestoreHead(uid,head)
+    local b=HeadBak[uid]; if not b then return end
+    pcall(function()
+        head.Size=b.Size head.Transparency=b.Trans head.CanCollide=b.Col head.CanQuery=b.Que head.Massless=b.Mas
+    end)
+end
+
+local function KillShadow(uid)
+    if Shadows[uid] then pcall(function() Shadows[uid]:Destroy() end) Shadows[uid]=nil end
+end
+
+local function MkShadow(p)
+    local c=p.Character
+    if not c then return end
+    local uid=p.UserId
+    if Shadows[uid] and Shadows[uid].Parent==c then return end
+    KillShadow(uid)
+    local s=Instance.new("Part")
+    s.Name="FS" s.Size=Vector3.new(5,5,5) s.Transparency=1
+    s.CanCollide=false s.CanQuery=true s.CanTouch=false
+    s.Anchored=false s.Massless=true s.CastShadow=false s.Parent=c
+    Shadows[uid]=s
+end
+
+local function ApplyHB(p,pd)
+    local c=p.Character
+    if not c then return end
+    local uid=p.UserId
+    local head=c:FindFirstChild("Head")
+    if not head then return end
+    local want=pd.hbOn and (pd.inside and "shadow" or "expand") or "off"
+    if HBState[uid]==want then return end
+    HBState[uid]=want
+    if want=="expand" then
+        KillShadow(uid) SaveHead(uid,head)
+        pcall(function()
+            head.Size=Vector3.new(Cfg.HB.Size,Cfg.HB.Size,Cfg.HB.Size)
+            head.Transparency=1 head.CanCollide=false head.CanQuery=true head.Massless=true
+        end)
+    elseif want=="shadow" then
+        local b=HeadBak[uid] or {}
+        pcall(function()
+            head.Size=b.Size or Vector3.new(2,1,1)
+            head.Transparency=b.Trans or 0
+        end)
+        MkShadow(p)
+    else
+        KillShadow(uid) RestoreHead(uid,head) HeadBak[uid]=nil
+    end
+end
+
+local function TickShadows()
+    local cf=Cam.CFrame
+    local pos=cf.Position+cf.LookVector*3
+    for _,sh in pairs(Shadows) do
+        if sh and sh.Parent then pcall(function() sh.CFrame=CFrame.new(pos) end) end
+    end
+end
+
+local function EnsHBV(uid)
+    if HBViz[uid] and HBViz[uid].Parent then return HBViz[uid] end
+    local f=Instance.new("Folder",VR); f.Name="HB_"..uid
+    local sb=Instance.new("SelectionBox",f); sb.Name="Box"; sb.LineThickness=0.05
+    HBViz[uid]=f
+    return f
+end
+
+local function UpdHBV(p,pd)
+    local uid=p.UserId
+    if not pd.hbOn or not pd.alive then
+        local f=HBViz[uid]; if f then local sb=f:FindFirstChild("Box"); if sb then sb.Adornee=nil end end
+        return
+    end
+    local f=EnsHBV(uid)
+    local sb=f:FindFirstChild("Box")
+    local c=p.Character
+    local head=c and c:FindFirstChild("Head")
+    local root=c and c:FindFirstChild("HumanoidRootPart")
+    if not sb or not root then return end
+    local col=pd.inside and Theme2.Success or (pd.score>=25 and Theme2.Danger or Theme2.Accent)
+    sb.Adornee=pd.inside and root or head
+    sb.Color3=col sb.SurfaceColor3=col sb.SurfaceTransparency=Cfg.HB.Trans
+end
+
+local function EnsESP(uid)
+    if ESPViz[uid] and ESPViz[uid].Parent then return ESPViz[uid] end
+    local f=Instance.new("Folder",VR); f.Name="ESP_"..uid
+    local hl=Instance.new("Highlight",f); hl.Name="HL"; hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; hl.Enabled=false
+    local bg=Instance.new("BillboardGui",f); bg.Name="BG"; bg.AlwaysOnTop=true
+    bg.Size=UDim2.new(0,210,0,120); bg.StudsOffset=Vector3.new(0,3,0); bg.MaxDistance=3500; bg.Enabled=false
+    local ct=Instance.new("Frame",bg); ct.Name="CT"; ct.Size=UDim2.new(1,0,1,0); ct.BackgroundTransparency=1
+    local ly=Instance.new("UIListLayout",ct); ly.HorizontalAlignment=Enum.HorizontalAlignment.Center; ly.Padding=UDim.new(0,2)
+    local function MkLbl(nm,ord,h,sz)
+        local l=Instance.new("TextLabel",ct); l.Name=nm; l.LayoutOrder=ord; l.Size=UDim2.new(1,0,0,h)
+        l.BackgroundTransparency=1; l.Font=Enum.Font.GothamBold; l.TextSize=sz
+        l.TextStrokeTransparency=0; l.TextStrokeColor3=Color3.new(0,0,0); l.RichText=true
+    end
+    MkLbl("NL",1,18,13); MkLbl("DL",2,16,14); MkLbl("HL2",3,14,11)
+    local hpBg=Instance.new("Frame",ct); hpBg.Name="HPBg"; hpBg.LayoutOrder=4
+    hpBg.Size=UDim2.new(0.8,0,0,5); hpBg.BackgroundColor3=Color3.fromRGB(30,10,10); hpBg.BorderSizePixel=0
+    Instance.new("UICorner",hpBg).CornerRadius=UDim.new(1,0)
+    local hpFill=Instance.new("Frame",hpBg); hpFill.Name="HPFill"; hpFill.Size=UDim2.new(1,0,1,0)
+    hpFill.BackgroundColor3=Theme2.Success; hpFill.BorderSizePixel=0
+    Instance.new("UICorner",hpFill).CornerRadius=UDim.new(1,0)
+    MkLbl("SL",5,14,10)
+    ESPViz[uid]=f
+    return f
+end
+
+local function UpdESP(p,pd)
+    local uid=p.UserId
+    if not pd.espOn or not pd.alive then
+        local f=ESPViz[uid]
+        if f then
+            local hl=f:FindFirstChild("HL"); if hl then hl.Enabled=false end
+            local bg=f:FindFirstChild("BG"); if bg then bg.Enabled=false end
+        end
+        return
+    end
+    local f=EnsESP(uid)
+    local c=p.Character
+    local root=c and c:FindFirstChild("HumanoidRootPart")
+    local hum=c and c:FindFirstChildOfClass("Humanoid")
+    if not root or not hum then return end
+    local dist=pd.dist
+    if dist>Cfg.ESP.MaxD then return end
+    local fade=Cfg.ESP.Fade and math.clamp((dist-Cfg.ESP.NearD)/math.max(Cfg.ESP.FarD-Cfg.ESP.NearD,1),0,1) or 0
+    local isThreat=pd.score>=25
+    local baseColor=isThreat and Theme2.Danger or Theme2.Secondary
+    local hp, maxHp = hum.Health, math.max(hum.MaxHealth,1)
+    local hpRatio=math.clamp(hp/maxHp,0,1)
+    local hpCol=HpColor(hpRatio)
+    local tf=math.max(fade*0.5,Cfg.ESP.Trans)
+    local hl=f:FindFirstChild("HL"); local bg=f:FindFirstChild("BG")
+    if hl and Cfg.ESP.HL then
+        hl.Enabled=true; hl.Adornee=c
+        hl.FillColor=pd.inside and Theme2.Success or baseColor
+        hl.OutlineColor=isThreat and Theme2.Danger or Theme2.Secondary
+        hl.FillTransparency=math.max(0.1,fade*0.7)
+        hl.OutlineTransparency=fade*0.5
+    elseif hl then hl.Enabled=false end
+    if bg then bg.Adornee=root; bg.Enabled=true end
+    local ct=bg and bg:FindFirstChild("CT"); if not ct then return end
+    local nl=ct:FindFirstChild("NL")
+    if nl and Cfg.ESP.Name then
+        nl.Visible=true
+        local tag=isThreat and string.format(' <font color="#FF4444">[%d]</font>',pd.score) or ""
+        nl.Text="<b>"..p.Name.."</b>"..tag
+        nl.TextColor3=baseColor
+        nl.TextTransparency=tf
+    elseif nl then nl.Visible=false end
+    local dl=ct:FindFirstChild("DL")
+    if dl and Cfg.ESP.Dist then
+        dl.Visible=true
+        dl.Text=string.format("%.0f m",dist)
+        dl.TextColor3=Theme2.Success:Lerp(Theme2.Danger,math.clamp(dist/Cfg.ESP.MaxD,0,1))
+        dl.TextTransparency=tf
+    elseif dl then dl.Visible=false end
+    local h2=ct:FindFirstChild("HL2")
+    if h2 and Cfg.ESP.HP then
+        h2.Visible=true
+        h2.Text=string.format('<font color="#%02X%02X%02X">%.0f/%.0f</font>',math.floor(hpCol.R*255),math.floor(hpCol.G*255),math.floor(hpCol.B*255),hp,maxHp)
+        h2.TextTransparency=tf
+    elseif h2 then h2.Visible=false end
+    local hpBg=ct:FindFirstChild("HPBg"); local hpFill=hpBg and hpBg:FindFirstChild("HPFill")
+    if hpBg and Cfg.ESP.HP then
+        hpBg.Visible=true
+        if hpFill then hpFill.Size=UDim2.new(hpRatio,0,1,0) hpFill.BackgroundColor3=hpCol end
+    elseif hpBg then hpBg.Visible=false end
+    local sl=ct:FindFirstChild("SL")
+    if sl and Cfg.ESP.Status then
+        sl.Visible=true
+        if pd.inside then sl.Text='<font color="#00FF88">⚡ SHADOW</font>'
+        elseif pd.hbOn then sl.Text='<font color="#FFD000">● HITBOX</font>'
+        elseif not pd.canSee and Cfg.HB.Wall then sl.Text='<font color="#FF6666">✖ CHE</font>'
+        else sl.Text="" end
+        sl.TextTransparency=tf*0.5
+    elseif sl then sl.Visible=false end
+end
+
+local function FullReset(p)
+    local uid=p.UserId
+    KillShadow(uid); HBState[uid]=nil
+    local c=p.Character
+    if c then local h=c:FindFirstChild("Head"); if h then RestoreHead(uid,h) end end
+    HeadBak[uid]=nil; PData[uid]=nil
+end
+
+local function HideVis(uid)
+    local h=HBViz[uid]; if h then local sb=h:FindFirstChild("Box"); if sb then sb.Adornee=nil end end
+    local e=ESPViz[uid]
+    if e then
+        local hl=e:FindFirstChild("HL"); if hl then hl.Enabled=false end
+        local bg=e:FindFirstChild("BG"); if bg then bg.Enabled=false end
+    end
+end
+
+local function HookP(p)
+    table.insert(Conns,p.CharacterAdded:Connect(function()
+        local uid=p.UserId
+        HeadBak[uid]=nil; HBState[uid]=nil
+        KillShadow(uid); HideVis(uid)
+        local pd=GetPD(uid); pd.t=0; pd.tT=0; pd.tV=0; pd.lastSeen=tick(); pd.canSee=true
+    end))
+    table.insert(Conns,p.CharacterRemoving:Connect(function() FullReset(p) end))
+end
+
+local function SyncTeams()
+    for _,t in ipairs(Teams:GetChildren()) do
+        if t:IsA("Team") and not Cfg.Team[t.Name] then
+            Cfg.Team[t.Name]={Mode=0,Color=t.TeamColor.Color}
+        end
+    end
+    Cfg.Team["__N__"]=Cfg.Team["__N__"] or {Mode=0,Color=Color3.new(1,1,1)}
+end
+
+SyncTeams()
+table.insert(Conns,Teams.ChildAdded:Connect(SyncTeams))
+for _,p in ipairs(Players:GetPlayers()) do HookP(p) end
+table.insert(Conns,Players.PlayerAdded:Connect(HookP))
+table.insert(Conns,Players.PlayerRemoving:Connect(function(p)
+    FullReset(p)
+    local uid=p.UserId
+    if HBViz[uid] then pcall(function() HBViz[uid]:Destroy() end) HBViz[uid]=nil end
+    if ESPViz[uid] then pcall(function() ESPViz[uid]:Destroy() end) ESPViz[uid]=nil end
+end))
+
+local function BuildUI()
+    local Gui=Instance.new("ScreenGui",CoreGui)
+    Gui.Name="Flow_VN"
+    Gui.ResetOnSpawn=false
+    Gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+    
+    local Main=Instance.new("Frame",Gui)
+    Main.Name="Main"
+    Main.Size=UDim2.new(0,460,0,580)
+    Main.Position=UDim2.new(0.5,-230,0.5,-290)
+    Main.BackgroundColor3=Theme2.Glass
+    Main.BorderSizePixel=0
+    Main.Active=true
+    Main.Draggable=true
+    Main.ClipsDescendants=true
+    Instance.new("UICorner",Main).CornerRadius=UDim.new(0,16)
+    local mSt=Instance.new("UIStroke",Main); mSt.Color=Theme2.GlassBorder; mSt.Thickness=1.5; mSt.Transparency=0.25
+    local mGrad=Instance.new("UIGradient",Main)
+    mGrad.Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(24,12,12)),
+        ColorSequenceKeypoint.new(0.5,Color3.fromRGB(14,8,8)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(8,4,4))}
+    mGrad.Rotation=150
+    
+    local Header=Instance.new("Frame",Main)
+    Header.Size=UDim2.new(1,0,0,76)
+    Header.BackgroundColor3=Theme2.Primary
+    Header.BorderSizePixel=0
+    Instance.new("UICorner",Header).CornerRadius=UDim.new(0,16)
+    local hGrad=Instance.new("UIGradient",Header)
+    hGrad.Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(230,50,40)),
+        ColorSequenceKeypoint.new(0.4,Color3.fromRGB(210,40,30)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(150,20,15))}
+    hGrad.Rotation=135
+    local hFix=Instance.new("Frame",Header)
+    hFix.Size=UDim2.new(1,0,0,18)
+    hFix.Position=UDim2.new(0,0,1,-18)
+    hFix.BackgroundColor3=Color3.fromRGB(150,20,15)
+    hFix.BorderSizePixel=0
+    hFix.ZIndex=0
+    
+    local StarC=Instance.new("Frame",Header)
+    StarC.Size=UDim2.new(0,50,0,50)
+    StarC.Position=UDim2.new(0,12,0,11)
+    StarC.BackgroundTransparency=1
+    local Star=Instance.new("TextLabel",StarC)
+    Star.Size=UDim2.new(1,0,1,0)
+    Star.Text="★"
+    Star.TextColor3=Theme2.Secondary
+    Star.Font=Enum.Font.GothamBlack
+    Star.TextSize=40
+    Star.BackgroundTransparency=1
+    
+    task.spawn(function()
+        while Star.Parent do
+            Tw(Star,{TextColor3=Color3.fromRGB(255,240,120)},0.9)
+            task.wait(0.9)
+            Tw(Star,{TextColor3=Theme2.Secondary},0.9)
+            task.wait(0.9)
+        end
+    end)
+    
+    local Title=Instance.new("TextLabel",Header)
+    Title.Size=UDim2.new(1,-130,0,24)
+    Title.Position=UDim2.new(0,70,0,9)
+    Title.Text="FLOW • RỒNG VIỆT"
+    Title.Font=Enum.Font.GothamBlack
+    Title.TextSize=17
+    Title.TextColor3=Theme2.Secondary
+    Title.BackgroundTransparency=1
+    Title.TextXAlignment=Enum.TextXAlignment.Left
+    
+    local Sub=Instance.new("TextLabel",Header)
+    Sub.Size=UDim2.new(1,-130,0,16)
+    Sub.Position=UDim2.new(0,70,0,32)
+    Sub.Text="ESP + HITBOX • Quan sát đa điểm • Lọc đe dọa"
+    Sub.Font=Enum.Font.Gotham
+    Sub.TextSize=10
+    Sub.TextColor3=Color3.fromRGB(255,220,185)
+    Sub.BackgroundTransparency=1
+    Sub.TextXAlignment=Enum.TextXAlignment.Left
+    
+    local Quote=Instance.new("TextLabel",Header)
+    Quote.Size=UDim2.new(1,-130,0,14)
+    Quote.Position=UDim2.new(0,70,0,50)
+    Quote.Text='"Đoàn kết, kỷ luật, sáng tạo"'
+    Quote.Font=Enum.Font.Gotham
+    Quote.TextSize=9
+    Quote.TextColor3=Color3.fromRGB(255,200,150)
+    Quote.BackgroundTransparency=1
+    Quote.TextXAlignment=Enum.TextXAlignment.Left
+    Quote.TextTransparency=0.35
+    
+    local CloseBtn=Instance.new("TextButton",Header)
+    CloseBtn.Size=UDim2.new(0,30,0,30)
+    CloseBtn.Position=UDim2.new(1,-40,0,10)
+    CloseBtn.Text="✕"
+    CloseBtn.TextColor3=Theme2.Secondary
+    CloseBtn.Font=Enum.Font.GothamBold
+    CloseBtn.TextSize=16
+    CloseBtn.BackgroundColor3=Color3.fromRGB(120,20,15)
+    CloseBtn.BorderSizePixel=0
+    CloseBtn.AutoButtonColor=false
+    Instance.new("UICorner",CloseBtn).CornerRadius=UDim.new(0,8)
+    CloseBtn.MouseEnter:Connect(function() Tw(CloseBtn,{BackgroundColor3=Theme2.Danger},0.12) end)
+    CloseBtn.MouseLeave:Connect(function() Tw(CloseBtn,{BackgroundColor3=Color3.fromRGB(120,20,15)},0.12) end)
+    CloseBtn.MouseButton1Click:Connect(function()
+        Tw(Main,{Size=UDim2.new(0,460,0,0)},0.3)
+        task.delay(0.3,function() Main.Visible=false Main.Size=UDim2.new(0,460,0,580) end)
+    end)
+    
+    local TabBar=Instance.new("Frame",Main)
+    TabBar.Size=UDim2.new(1,-20,0,36)
+    TabBar.Position=UDim2.new(0,10,0,84)
+    TabBar.BackgroundColor3=Theme2.GlassLight
+    TabBar.BackgroundTransparency=0.3
+    TabBar.BorderSizePixel=0
+    Instance.new("UICorner",TabBar).CornerRadius=UDim.new(0,10)
+    local tbSt=Instance.new("UIStroke",TabBar); tbSt.Color=Theme2.GlassBorder; tbSt.Transparency=0.45
+    
+    local tbLy=Instance.new("UIListLayout",TabBar)
+    tbLy.FillDirection=Enum.FillDirection.Horizontal
+    tbLy.HorizontalAlignment=Enum.HorizontalAlignment.Center
+    tbLy.VerticalAlignment=Enum.VerticalAlignment.Center
+    tbLy.Padding=UDim.new(0,6)
+    
+    local Content=Instance.new("Frame",Main)
+    Content.Size=UDim2.new(1,-20,1,-170)
+    Content.Position=UDim2.new(0,10,0,128)
+    Content.BackgroundTransparency=1
+    Content.ClipsDescendants=true
+    
+    local StatusBar=Instance.new("Frame",Main)
+    StatusBar.Size=UDim2.new(1,-20,0,26)
+    StatusBar.Position=UDim2.new(0,10,1,-34)
+    StatusBar.BackgroundColor3=Theme2.GlassLight
+    StatusBar.BackgroundTransparency=0.4
+    StatusBar.BorderSizePixel=0
+    Instance.new("UICorner",StatusBar).CornerRadius=UDim.new(0,8)
+    
+    local StatusLbl=Instance.new("TextLabel",StatusBar)
+    StatusLbl.Size=UDim2.new(1,-12,1,0)
+    StatusLbl.Position=UDim2.new(0,6,0,0)
+    StatusLbl.Text="🇻🇳 Sẵn sàng chiến đấu"
+    StatusLbl.TextColor3=Theme2.TextMuted
+    StatusLbl.Font=Enum.Font.Gotham
+    StatusLbl.TextSize=10
+    StatusLbl.TextXAlignment=Enum.TextXAlignment.Left
+    StatusLbl.BackgroundTransparency=1
+    
+    local tabs={}
+    local function MkScroll()
+        local s=Instance.new("ScrollingFrame",Content)
+        s.Size=UDim2.new(1,0,1,0)
+        s.BackgroundTransparency=1
+        s.AutomaticCanvasSize=Enum.AutomaticSize.Y
+        s.CanvasSize=UDim2.new(0,0,0,0)
+        s.ScrollBarThickness=3
+        s.ScrollBarImageColor3=Theme2.Primary
+        s.BorderSizePixel=0
+        s.Visible=false
+        local ly=Instance.new("UIListLayout",s)
+        ly.Padding=UDim.new(0,6)
+        ly.SortOrder=Enum.SortOrder.LayoutOrder
+        local pd=Instance.new("UIPadding",s)
+        pd.PaddingTop=UDim.new(0,4)
+        pd.PaddingBottom=UDim.new(0,10)
+        return s
+    end
+    
+    local function MkTab(name,icon)
+        local btn=Instance.new("TextButton",TabBar)
+        btn.Size=UDim2.new(0,140,0,30)
+        btn.Text=icon.."  "..name
+        btn.Font=Enum.Font.GothamBold
+        btn.TextSize=11
+        btn.TextColor3=Theme2.TextMuted
+        btn.BackgroundColor3=Theme2.Glass
+        btn.BackgroundTransparency=0.5
+        btn.BorderSizePixel=0
+        btn.AutoButtonColor=false
+        Instance.new("UICorner",btn).CornerRadius=UDim.new(0,8)
+        local ind=Instance.new("Frame",btn)
+        ind.Size=UDim2.new(0.6,0,0,3)
+        ind.Position=UDim2.new(0.2,0,1,-4)
+        ind.BackgroundColor3=Theme2.Secondary
+        ind.BorderSizePixel=0
+        ind.Visible=false
+        Instance.new("UICorner",ind).CornerRadius=UDim.new(1,0)
+        local scroll=MkScroll()
+        tabs[name]={btn=btn,ind=ind,scroll=scroll}
+        btn.MouseEnter:Connect(function() if not ind.Visible then Tw(btn,{BackgroundTransparency=0.3},0.12) end end)
+        btn.MouseLeave:Connect(function() if not ind.Visible then Tw(btn,{BackgroundTransparency=0.5},0.12) end end)
+        btn.MouseButton1Click:Connect(function()
+            for n,d in pairs(tabs) do
+                local a=(n==name)
+                d.scroll.Visible=a d.ind.Visible=a
+                Tw(d.btn,{TextColor3=a and Theme2.Secondary or Theme2.TextMuted,BackgroundColor3=a and Color3.fromRGB(45,20,20) or Theme2.Glass,BackgroundTransparency=a and 0.2 or 0.5},0.18)
+            end
+        end)
+        return scroll
+    end
+    
+    local tT=MkTab("MỤC TIÊU","🎯")
+    local tH=MkTab("HITBOX","📦")
+    local tE=MkTab("ESP","👁")
+    
+    tabs["MỤC TIÊU"].btn.TextColor3=Theme2.Secondary
+    tabs["MỤC TIÊU"].btn.BackgroundColor3=Color3.fromRGB(45,20,20)
+    tabs["MỤC TIÊU"].btn.BackgroundTransparency=0.2
+    tabs["MỤC TIÊU"].ind.Visible=true
+    tabs["MỤC TIÊU"].scroll.Visible=true
+    
+    local function Card(par,h)
+        local f=Instance.new("Frame",par)
+        f.Size=UDim2.new(1,0,0,h or 44)
+        f.BackgroundColor3=Theme2.GlassLight
+        f.BackgroundTransparency=0.35
+        f.BorderSizePixel=0
+        Instance.new("UICorner",f).CornerRadius=UDim.new(0,12)
+        local st=Instance.new("UIStroke",f); st.Color=Theme2.GlassBorder; st.Transparency=0.6
+        return f
+    end
+    
+    local function Header(par,txt)
+        local f=Card(par,28)
+        f.BackgroundColor3=Color3.fromRGB(50,20,18)
+        f.BackgroundTransparency=0.2
+        local g=Instance.new("UIGradient",f)
+        g.Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0,Color3.fromRGB(75,25,20)),
+            ColorSequenceKeypoint.new(1,Color3.fromRGB(30,12,10))}
+        local ic=Instance.new("TextLabel",f)
+        ic.Size=UDim2.new(0,22,1,0)
+        ic.Position=UDim2.new(0,10,0,0)
+        ic.Text="★"
+        ic.TextColor3=Theme2.Secondary
+        ic.Font=Enum.Font.GothamBold
+        ic.TextSize=13
+        ic.BackgroundTransparency=1
+        local l=Instance.new("TextLabel",f)
+        l.Size=UDim2.new(1,-40,1,0)
+        l.Position=UDim2.new(0,32,0,0)
+        l.Text=txt
+        l.TextColor3=Theme2.Secondary
+        l.Font=Enum.Font.GothamBold
+        l.TextSize=11
+        l.TextXAlignment=Enum.TextXAlignment.Left
+        l.BackgroundTransparency=1
+    end
+    
+    local function Toggle(par,lbl,init,cb,col)
+        col=col or Theme2.Primary
+        local f=Card(par,44)
+        local trk=Instance.new("Frame",f)
+        trk.Size=UDim2.new(0,44,0,22)
+        trk.Position=UDim2.new(1,-54,0.5,-11)
+        trk.BackgroundColor3=init and col or Color3.fromRGB(50,40,40)
+        trk.BorderSizePixel=0
+        Instance.new("UICorner",trk).CornerRadius=UDim.new(1,0)
+        local thb=Instance.new("Frame",trk)
+        thb.Size=UDim2.new(0,16,0,16)
+        thb.Position=init and UDim2.new(1,-19,0.5,-8) or UDim2.new(0,3,0.5,-8)
+        thb.BackgroundColor3=init and Theme2.Secondary or Color3.fromRGB(180,180,180)
+        thb.BorderSizePixel=0
+        Instance.new("UICorner",thb).CornerRadius=UDim.new(1,0)
+        local glow=Instance.new("UIStroke",thb)
+        glow.Color=init and Theme2.Secondary or Color3.fromRGB(100,100,100)
+        glow.Thickness=2
+        glow.Transparency=init and 0.5 or 0.8
+        local tLbl=Instance.new("TextLabel",f)
+        tLbl.Size=UDim2.new(1,-65,1,0)
+        tLbl.Position=UDim2.new(0,14,0,0)
+        tLbl.Text=lbl
+        tLbl.Font=Enum.Font.Gotham
+        tLbl.TextSize=12
+        tLbl.TextColor3=init and Theme2.Text or Theme2.TextMuted
+        tLbl.TextXAlignment=Enum.TextXAlignment.Left
+        tLbl.BackgroundTransparency=1
+        local on=init
+        local btn=Instance.new("TextButton",f)
+        btn.Size=UDim2.new(1,0,1,0)
+        btn.BackgroundTransparency=1
+        btn.Text=""
+        btn.ZIndex=5
+        btn.MouseButton1Click:Connect(function()
+            on=not on
+            Tw(trk,{BackgroundColor3=on and col or Color3.fromRGB(50,40,40)},0.15)
+            Tw(thb,{Position=on and UDim2.new(1,-19,0.5,-8) or UDim2.new(0,3,0.5,-8),BackgroundColor3=on and Theme2.Secondary or Color3.fromRGB(180,180,180)},0.18)
+            Tw(glow,{Color=on and Theme2.Secondary or Color3.fromRGB(100,100,100),Transparency=on and 0.5 or 0.8},0.18)
+            Tw(tLbl,{TextColor3=on and Theme2.Text or Theme2.TextMuted},0.15)
+            cb(on)
+        end)
+    end
+    
+    local function Slider(par,lbl,mn,mx,def,dp,cb)
+        local f=Card(par,52)
+        local tLbl=Instance.new("TextLabel",f)
+        tLbl.Size=UDim2.new(1,-14,0,20)
+        tLbl.Position=UDim2.new(0,14,0,4)
+        tLbl.Text=lbl..": "..def
+        tLbl.TextColor3=Theme2.Text
+        tLbl.Font=Enum.Font.Gotham
+        tLbl.TextSize=11
+        tLbl.TextXAlignment=Enum.TextXAlignment.Left
+        tLbl.BackgroundTransparency=1
+        local trk=Instance.new("Frame",f)
+        trk.Size=UDim2.new(1,-28,0,6)
+        trk.Position=UDim2.new(0,14,0,34)
+        trk.BackgroundColor3=Color3.fromRGB(40,30,30)
+        trk.BorderSizePixel=0
+        Instance.new("UICorner",trk).CornerRadius=UDim.new(1,0)
+        local fill=Instance.new("Frame",trk)
+        fill.Size=UDim2.new((def-mn)/math.max(mx-mn,1),0,1,0)
+        fill.BackgroundColor3=Theme2.Primary
+        fill.BorderSizePixel=0
+        Instance.new("UICorner",fill).CornerRadius=UDim.new(1,0)
+        local fGrad=Instance.new("UIGradient",fill)
+        fGrad.Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0,Theme2.Primary),
+            ColorSequenceKeypoint.new(1,Theme2.Secondary)}
+        local thb=Instance.new("TextButton",trk)
+        thb.Size=UDim2.new(0,16,0,16)
+        thb.Position=UDim2.new((def-mn)/math.max(mx-mn,1),-8,0.5,-8)
+        thb.BackgroundColor3=Theme2.Secondary
+        thb.Text=""
+        thb.BorderSizePixel=0
+        thb.ZIndex=5
+        Instance.new("UICorner",thb).CornerRadius=UDim.new(1,0)
+        local tSt=Instance.new("UIStroke",thb)
+        tSt.Color=Theme2.Secondary
+        tSt.Thickness=2
+        tSt.Transparency=0.5
+        local prec=10^dp
+        local drag=false
+        local function upd(ix)
+            local tw=trk.AbsoluteSize.X
+            if tw<=0 then return end
+            local rel=math.clamp((ix-trk.AbsolutePosition.X)/tw,0,1)
+            local v=math.floor((mn+(mx-mn)*rel)*prec+0.5)/prec
+            fill.Size=UDim2.new(rel,0,1,0)
+            thb.Position=UDim2.new(rel,-8,0.5,-8)
+            tLbl.Text=lbl..": "..v
+            cb(v)
+        end
+        thb.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then drag=true end end)
+        trk.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then drag=true upd(i.Position.X) end end)
+        UIS.InputChanged:Connect(function(i) if drag and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then upd(i.Position.X) end end)
+        UIS.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then drag=false end end)
+    end
+    
+    Header(tT,"CHẾ ĐỘ NHẮM MỤC TIÊU")
+    Toggle(tT,"🎯  NHẮM TẤT CẢ — Bỏ qua Team",false,function(v) Cfg.TargetAll=v ForceRecalc() end,Theme2.Danger)
+    
+    Header(tT,"ĐIỀU KHIỂN TEAM")
+    local infoC=Card(tT,52)
+    infoC.BackgroundColor3=Color3.fromRGB(15,22,12)
+    local infoL=Instance.new("TextLabel",infoC)
+    infoL.Size=UDim2.new(1,-20,1,-8)
+    infoL.Position=UDim2.new(0,10,0,4)
+    infoL.Text="🔴 TẮT — Bỏ qua hoàn toàn\n🟢 TẤT CẢ — Nhắm toàn bộ\n🟠 ĐE DỌA — Chỉ khi điểm ≥ 25"
+    infoL.TextColor3=Color3.fromRGB(160,210,130)
+    infoL.Font=Enum.Font.Gotham
+    infoL.TextSize=10
+    infoL.TextWrapped=true
+    infoL.TextXAlignment=Enum.TextXAlignment.Left
+    infoL.TextYAlignment=Enum.TextYAlignment.Top
+    infoL.BackgroundTransparency=1
+    
+    local ML={[0]="TẮT",[1]="TẤT CẢ",[2]="ĐE DỌA"}
+    local MC={[0]=Color3.fromRGB(60,50,50),[1]=Theme2.Success,[2]=Theme2.Warning}
+    for nm,dat in pairs(Cfg.Team) do
+        local displayName=nm=="__N__" and "Không có Team" or nm
+        local f=Card(tT,40)
+        local dot=Instance.new("Frame",f)
+        dot.Size=UDim2.new(0,12,0,12)
+        dot.Position=UDim2.new(0,12,0.5,-6)
+        dot.BackgroundColor3=dat.Color
+        dot.BorderSizePixel=0
+        Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+        Instance.new("UIStroke",dot).Color=Color3.new(1,1,1)
+        local nl=Instance.new("TextLabel",f)
+        nl.Size=UDim2.new(0.5,0,1,0)
+        nl.Position=UDim2.new(0,32,0,0)
+        nl.Text=displayName
+        nl.TextColor3=Theme2.Text
+        nl.Font=Enum.Font.Gotham
+        nl.TextSize=11
+        nl.TextXAlignment=Enum.TextXAlignment.Left
+        nl.BackgroundTransparency=1
+        local mb=Instance.new("TextButton",f)
+        mb.Size=UDim2.new(0,85,0,26)
+        mb.Position=UDim2.new(1,-95,0.5,-13)
+        mb.Text=ML[dat.Mode]
+        mb.TextColor3=Color3.new(1,1,1)
+        mb.Font=Enum.Font.GothamBold
+        mb.TextSize=10
+        mb.BackgroundColor3=MC[dat.Mode]
+        mb.BorderSizePixel=0
+        mb.AutoButtonColor=false
+        Instance.new("UICorner",mb).CornerRadius=UDim.new(0,8)
+        mb.MouseButton1Click:Connect(function()
+            dat.Mode=(dat.Mode+1)%3
+            ForceRecalc()
+            mb.Text=ML[dat.Mode]
+            Tw(mb,{BackgroundColor3=MC[dat.Mode]},0.16)
+        end)
+    end
+    
+    Header(tH,"HITBOX CHỈ ĐẦU")
+    Toggle(tH,"📦  Bật Hitbox Expander",false,function(v) Cfg.HB.On=v ForceRecalc() end)
+    Toggle(tH,"🧱  Kiểm Tra Tường (đa điểm)",false,function(v) Cfg.HB.Wall=v ForceRecalc() end)
+    Slider(tH,"Kích Thước Hitbox",1,50,15,0,function(v) Cfg.HB.Size=v end)
+    Slider(tH,"Độ Trong Suốt",0,1,0.5,2,function(v) Cfg.HB.Trans=v end)
+    Slider(tH,"KC Tối Đa Hitbox",50,600,350,0,function(v) Cfg.HB.MaxD=v ForceRecalc() end)
+    local hbInfo=Card(tH,72); hbInfo.BackgroundColor3=Color3.fromRGB(12,20,12)
+    local hbInfoL=Instance.new("TextLabel",hbInfo)
+    hbInfoL.Size=UDim2.new(1,-20,1,-8)
+    hbInfoL.Position=UDim2.new(0,10,0,4)
+    hbInfoL.Text="★ Wall Check: Test 12+ điểm trên body\n★ Chỉ cần 1 phần visible = hiện hitbox\n★ Grace 0.5s sau khi khuất\n★ Shadow Mode: bắn hướng nào cũng trúng"
+    hbInfoL.TextColor3=Theme2.Success
+    hbInfoL.Font=Enum.Font.Gotham
+    hbInfoL.TextSize=9
+    hbInfoL.TextWrapped=true
+    hbInfoL.TextXAlignment=Enum.TextXAlignment.Left
+    hbInfoL.TextYAlignment=Enum.TextYAlignment.Top
+    hbInfoL.BackgroundTransparency=1
+    
+    Header(tE,"NEON ESP")
+    Toggle(tE,"👁️  Bật ESP",false,function(v) Cfg.ESP.On=v ForceRecalc() end)
+    Toggle(tE,"🌫️  Mờ Theo KC",true,function(v) Cfg.ESP.Fade=v end)
+    Slider(tE,"KC Tối Đa ESP",100,5000,2500,0,function(v) Cfg.ESP.MaxD=v ForceRecalc() end)
+    Slider(tE,"KC Gần (Rõ)",5,400,50,0,function(v) Cfg.ESP.NearD=v end)
+    Slider(tE,"KC Xa (Mờ)",100,3000,1000,0,function(v) Cfg.ESP.FarD=v end)
+    Header(tE,"THÀNH PHẦN HIỂN THỊ")
+    Toggle(tE,"🔷  Highlight Xuyên Tường",true,function(v) Cfg.ESP.HL=v end,Theme2.Secondary)
+    Toggle(tE,"👤  Tên + Điểm",true,function(v) Cfg.ESP.Name=v end,Theme2.Success)
+    Toggle(tE,"📍  Khoảng Cách",true,function(v) Cfg.ESP.Dist=v end,Theme2.Warning)
+    Toggle(tE,"❤️  Máu + Thanh HP",true,function(v) Cfg.ESP.HP=v end,Color3.fromRGB(255,100,150))
+    Toggle(tE,"⚡  Trạng Thái",true,function(v) Cfg.ESP.Status=v end,Theme2.Accent)
+    
+    local Fl=Instance.new("TextButton",Gui)
+    Fl.Size=UDim2.new(0,52,0,52)
+    Fl.Position=UDim2.new(0,10,0.4,0)
+    Fl.BackgroundColor3=Theme2.Primary
+    Fl.Text="★"
+    Fl.TextColor3=Theme2.Secondary
+    Fl.Font=Enum.Font.GothamBlack
+    Fl.TextSize=26
+    Fl.BorderSizePixel=0
+    Fl.ZIndex=50
+    Fl.AutoButtonColor=false
+    Instance.new("UICorner",Fl).CornerRadius=UDim.new(1,0)
+    local fSt=Instance.new("UIStroke",Fl); fSt.Color=Theme2.Secondary; fSt.Thickness=2.5
+    local fGrad=Instance.new("UIGradient",Fl)
+    fGrad.Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(230,50,40)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(160,20,15))}
+    fGrad.Rotation=135
+    task.spawn(function()
+        while Fl.Parent do
+            Tw(fSt,{Color=Color3.fromRGB(255,245,120)},0.9)
+            Tw(Fl,{TextColor3=Color3.fromRGB(255,245,120)},0.9)
+            task.wait(0.9)
+            Tw(fSt,{Color=Theme2.Secondary},0.9)
+            Tw(Fl,{TextColor3=Theme2.Secondary},0.9)
+            task.wait(0.9)
+        end
+    end)
+    local fd,fds,fps=false,nil,nil
+    Fl.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+            fd=true fds=i.Position fps=Fl.Position
+            Tw(Fl,{Size=UDim2.new(0,56,0,56)},0.1)
+        end
+    end)
+    Fl.InputChanged:Connect(function(i)
+        if fd and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+            local d=i.Position-fds
+            Fl.Position=UDim2.new(fps.X.Scale,fps.X.Offset+d.X,fps.Y.Scale,fps.Y.Offset+d.Y)
+        end
+    end)
+    Fl.InputEnded:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+            if fds then
+                local d=i.Position-fds
+                if math.abs(d.X)<8 and math.abs(d.Y)<8 then
+                    if Main.Visible then
+                        Tw(Main,{Size=UDim2.new(0,460,0,0)},0.3)
+                        task.delay(0.3,function() Main.Visible=false Main.Size=UDim2.new(0,460,0,580) end)
+                    else
+                        Main.Size=UDim2.new(0,460,0,0) Main.Visible=true
+                        Tw(Main,{Size=UDim2.new(0,460,0,580)},0.35)
+                    end
+                end
+            end
+            fd=false
+            Tw(Fl,{Size=UDim2.new(0,52,0,52)},0.1)
+        end
+    end)
+    
+    table.insert(Conns,UIS.InputBegan:Connect(function(i,gp)
+        if gp then return end
+        if i.KeyCode==Enum.KeyCode.RightControl or i.KeyCode==Enum.KeyCode.F6 then
+            Main.Visible=not Main.Visible
+        end
+    end))
+    
+    return StatusLbl
+end
+
+local StatusLabel=BuildUI()
+
+local frameCount=0
+local heartbeat=RS.Heartbeat:Connect(function()
+    frameCount+=1
+    TickShadows()
+    if frameCount%2~=0 then return end
+    local now=tick()
+    local players=Players:GetPlayers()
+    local count=#players
+    local targetCount=0
+    for i=1,math.min(count,6) do
+        local idx=((StaggerIdx+i-1)%count)+1
+        local p=players[idx]
+        if p==LP then continue end
+        local pd,upd=UpdatePD(p,now)
+        if not pd.alive then HideVis(p.UserId) continue end
+        if upd then
+            ApplyHB(p,pd)
+            UpdHBV(p,pd)
+            UpdESP(p,pd)
+        end
+        if pd.target then targetCount+=1 end
+    end
+    StaggerIdx=(StaggerIdx+6)%math.max(count,1)
+    if frameCount%30==0 and StatusLabel and StatusLabel.Parent then
+        local ft={}
+        if Cfg.HB.On then table.insert(ft,"HB") end
+        if Cfg.ESP.On then table.insert(ft,"ESP") end
+        if Cfg.HB.Wall then table.insert(ft,"WALL") end
+        local fs=#ft>0 and table.concat(ft," ") or "---"
+        StatusLabel.Text=string.format("🇻🇳 %s • Mục tiêu: %d • ESP: %.0fm",fs,targetCount,Cfg.ESP.MaxD)
+        StatusLabel.TextColor3=targetCount>0 and Theme2.Secondary or Theme2.TextMuted
+    end
+end)
+table.insert(Conns,heartbeat)
+
+_G._FlowKill=function()
+    for _,c in ipairs(Conns) do pcall(function() c:Disconnect() end) end
+    Conns={}
+    for _,p in ipairs(Players:GetPlayers()) do if p~=LP then FullReset(p) end end
+    if VR and VR.Parent then VR:Destroy() end
+    local gui=CoreGui:FindFirstChild("Flow_VN"); if gui then gui:Destroy() end
+end
