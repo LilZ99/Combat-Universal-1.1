@@ -1,0 +1,1141 @@
+if _G._FlowKill then pcall(_G._FlowKill) end
+
+--[[
+    ██╗  ██╗ ██████╗ ███╗   ██╗ ██████╗     ██╗      ██████╗ ███╗   ██╗ ██████╗ 
+    ██║  ██║██╔═══██╗████╗  ██║██╔════╝     ██║     ██╔═══██╗████╗  ██║██╔════╝ 
+    ███████║██║   ██║██╔██╗ ██║██║  ███╗    ██║     ██║   ██║██╔██╗ ██║██║  ███╗
+    ██╔══██║██║   ██║██║╚██╗██║██║   ██║    ██║     ██║   ██║██║╚██╗██║██║   ██║
+    ██║  ██║╚██████╔╝██║ ╚████║╚██████╔╝    ███████╗╚██████╔╝██║ ╚████║╚██████╔╝
+    ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ 
+    
+    ★ FLOW v6.1 — HỒNG LONG VIỆT NAM ★
+    ★ FIX: Weapon Detection + Zone Transition + Hitbox Damage ★
+]]
+
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Teams = game:GetService("Teams")
+local UIS = game:GetService("UserInputService")
+local CS = game:GetService("CollectionService")
+local LP = Players.LocalPlayer
+local Cam = workspace.CurrentCamera
+
+for _, n in ipairs({"Flow_Loading","Flow_VN_v5","Flow_VN_v51","Flow_VN_v52","Flow_VN_v53","Flow_VN_v54","Flow_VN_v6","Flow_VN_v61","Elysium_VR","HongLong_VR"}) do
+    pcall(function() CoreGui:FindFirstChild(n):Destroy() end)
+end
+
+local V3, CF, C3, UD2 = Vector3.new, CFrame.new, Color3.fromRGB, UDim2.new
+local abs, min, max, floor, ceil, clamp = math.abs, math.min, math.max, math.floor, math.ceil, math.clamp
+local sin, cos, rad, random = math.sin, math.cos, math.rad, math.random
+
+-- ═══════════ 🇻🇳 THEME VIỆT NAM 🇻🇳 ═══════════
+local VN = {
+    Do = C3(218, 37, 29), DoSang = C3(255, 60, 50), DoTham = C3(150, 20, 15),
+    Vang = C3(255, 203, 5), VangSang = C3(255, 235, 100), VangKim = C3(255, 215, 0),
+    Nen = C3(12, 6, 6), NenNhat = C3(25, 12, 12), Vien = C3(80, 30, 25),
+    AnToan = C3(34, 197, 94), NguyHiem = C3(239, 68, 68), CanhBao = C3(251, 191, 36), DacBiet = C3(180, 100, 255),
+    Chu = C3(252, 248, 244), ChuMo = C3(148, 118, 112), ChuToi = C3(100, 78, 75),
+}
+
+local function Tw(o,p,t,s,d) if not o or not o.Parent then return end; local tw = TS:Create(o,TweenInfo.new(t or 0.25,s or Enum.EasingStyle.Quint,d or Enum.EasingDirection.Out),p); tw:Play(); return tw end
+local function TwSpring(o,p,t) return Tw(o,p,t or 0.35,Enum.EasingStyle.Back,Enum.EasingDirection.Out) end
+
+-- ═══════════ 🇻🇳 LOADING SCREEN 🇻🇳 ═══════════
+do
+    local L = Instance.new("ScreenGui", CoreGui); L.Name = "Flow_Loading"; L.IgnoreGuiInset = true; L.DisplayOrder = 9999
+    local BG = Instance.new("Frame", L); BG.Size = UD2(1,0,1,0); BG.BackgroundColor3 = VN.DoTham; BG.BorderSizePixel = 0
+    local bgGrad = Instance.new("UIGradient", BG); bgGrad.Color = ColorSequence.new{ColorSequenceKeypoint.new(0,C3(30,8,8)),ColorSequenceKeypoint.new(0.5,C3(60,15,12)),ColorSequenceKeypoint.new(1,C3(30,8,8))}; bgGrad.Rotation = 45
+    local Card = Instance.new("Frame", BG); Card.Size = UD2(0,380,0,260); Card.Position = UD2(0.5,-190,0.5,-130); Card.BackgroundColor3 = VN.Nen; Card.BorderSizePixel = 0
+    Instance.new("UICorner", Card).CornerRadius = UDim.new(0,20); Instance.new("UIStroke", Card).Color = VN.Do
+    local Flag = Instance.new("Frame", Card); Flag.Size = UD2(0,72,0,48); Flag.Position = UD2(0.5,-36,0,18); Flag.BackgroundColor3 = VN.Do; Flag.BorderSizePixel = 0
+    Instance.new("UICorner", Flag).CornerRadius = UDim.new(0,6); Instance.new("UIStroke", Flag).Color = VN.VangKim
+    local Star = Instance.new("TextLabel", Flag); Star.Size = UD2(1,0,1,0); Star.BackgroundTransparency = 1; Star.Text = "★"; Star.TextColor3 = VN.Vang; Star.TextSize = 32; Star.Font = Enum.Font.GothamBlack
+    local Title = Instance.new("TextLabel", Card); Title.Size = UD2(1,0,0,36); Title.Position = UD2(0,0,0,72); Title.BackgroundTransparency = 1; Title.Text = "⚡ FLOW v6.1 ⚡"; Title.Font = Enum.Font.GothamBlack; Title.TextSize = 24; Title.TextColor3 = VN.Vang
+    local Sub = Instance.new("TextLabel", Card); Sub.Size = UD2(1,0,0,20); Sub.Position = UD2(0,0,0,106); Sub.BackgroundTransparency = 1; Sub.Text = "🐉 WEAPON + ZONE + HITBOX FIX 🐉"; Sub.Font = Enum.Font.GothamBold; Sub.TextSize = 11; Sub.TextColor3 = VN.VangSang
+    local PBCont = Instance.new("Frame", Card); PBCont.Size = UD2(0.8,0,0,18); PBCont.Position = UD2(0.1,0,0,140); PBCont.BackgroundColor3 = C3(30,12,12); PBCont.BorderSizePixel = 0
+    Instance.new("UICorner", PBCont).CornerRadius = UDim.new(0,9); Instance.new("UIStroke", PBCont).Color = VN.Vien
+    local PBFill = Instance.new("Frame", PBCont); PBFill.Size = UD2(0,0,1,0); PBFill.BackgroundColor3 = VN.Do; PBFill.BorderSizePixel = 0; Instance.new("UICorner", PBFill).CornerRadius = UDim.new(0,9)
+    Instance.new("UIGradient", PBFill).Color = ColorSequence.new{ColorSequenceKeypoint.new(0,VN.Do),ColorSequenceKeypoint.new(0.5,VN.DoSang),ColorSequenceKeypoint.new(1,VN.Vang)}
+    local Status = Instance.new("TextLabel", Card); Status.Size = UD2(1,0,0,16); Status.Position = UD2(0,0,0,168); Status.BackgroundTransparency = 1; Status.Font = Enum.Font.GothamMedium; Status.TextSize = 11; Status.TextColor3 = VN.ChuMo; Status.Text = "Đang khởi động..."
+    local Pct = Instance.new("TextLabel", Card); Pct.Size = UD2(1,0,0,24); Pct.Position = UD2(0,0,0,188); Pct.BackgroundTransparency = 1; Pct.Font = Enum.Font.GothamBlack; Pct.TextSize = 20; Pct.TextColor3 = VN.Vang; Pct.Text = "0%"
+    local Footer = Instance.new("TextLabel", Card); Footer.Size = UD2(1,0,0,16); Footer.Position = UD2(0,0,1,-24); Footer.BackgroundTransparency = 1; Footer.Text = "🇻🇳 Vinh quang Tổ quốc Việt Nam 🇻🇳"; Footer.Font = Enum.Font.GothamMedium; Footer.TextSize = 10; Footer.TextColor3 = VN.ChuMo
+    task.spawn(function()
+        local steps = {{0,"🔄 Khởi động..."},{20,"🧠 Nạp AI Vũ khí (200+ loại)..."},{40,"🗺️ Zone Transition Engine..."},{60,"📦 Hitbox Damage System..."},{80,"👁️ ESP Engine..."},{100,"✅ HOÀN TẤT!"}}
+        for _,s in ipairs(steps) do Status.Text = s[2]; Pct.Text = s[1].."%"; Tw(PBFill,{Size=UD2(s[1]/100,0,1,0)},0.25); task.wait(0.3) end
+        task.wait(0.3); Tw(BG,{BackgroundTransparency=1},0.35); Tw(Card,{BackgroundTransparency=1},0.35); task.wait(0.4); L:Destroy()
+    end)
+end
+task.wait(2.3)
+
+-- ═══════════ CONFIG ═══════════
+local Cfg = {
+    NhamTatCa = false,
+    Team = {},
+    HB = {On = false, Size = 15, Trans = 0.7, Wall = false, MaxD = 400, Adaptive = true},
+    ESP = {On = false, Fade = true, NearD = 50, FarD = 600, MaxD = 1500, HL = true, Name = true, Dist = true, HP = true, Wpn = true, Status = true},
+    Perf = {MaxPlayers = 10, UpdateRate = 0.12, AdaptiveFPS = true},
+}
+
+local HeadBak, HBViz, ESPViz, PData, HBState = {}, {}, {}, {}, {}
+local Conns = {}
+local VR = Instance.new("Folder", CoreGui); VR.Name = "HongLong_VR"
+
+-- ═══════════ 🧠 MEGA WEAPON DATABASE (200+ WEAPONS) ═══════════
+local WPN_CACHE = {}
+local CACHE_TTL = 12
+
+local WPN_DB = {
+    -- ★★★ MASSIVE WEAPON NAME DATABASE ★★★
+    Names = {
+        -- === PISTOLS ===
+        "pistol","handgun","sidearm","glock","g17","g18","g19","g26","deagle","desert eagle","desertea gle",
+        "m1911","m9","m92","beretta","usp","usp45","p250","p2000","fiveseven","five seven","57",
+        "cz75","tec9","tec-9","revolver","357","44mag","44magnum","magnum","python","colt",
+        "luger","mauser","c96","walther","ppk","p38","tokarev","tt33","nagant","webley",
+        "hipoint","ruger","sig","sigp226","sigp320","fnx","fn57","hk45","mk23","1911",
+        
+        -- === RIFLES ===
+        "rifle","ar","ar15","ar-15","m4","m4a1","m16","m16a1","m16a4","hk416","hk417",
+        "ak","ak47","ak-47","ak74","akm","aks74u","ak12","rpk","pkm","ak103",
+        "scar","scarl","scarh","scar-l","scar-h","acr","tar21","tavor","aug","steyr",
+        "famas","fa-mas","g36","g36c","l85","l86","qbz","type95","type97",
+        "m14","m1a","m1garand","garand","kar98","kar98k","mosin","mosinnagant",
+        "springfield","m1903","lee enfield","enfield","gewehr","g43","svt40",
+        "fal","fnfal","g3","hk33","cetme","galil","galil ace","sig550","sig552",
+        
+        -- === SMG ===
+        "smg","submachine","mp5","mp5k","mp5sd","mp7","mp9","mp40","ump","ump45","ump9",
+        "p90","p-90","pp19","ppsh","ppsh41","thompson","tommy gun","tommygun","m1a1",
+        "mac10","mac-10","mac11","uzi","microuzi","mini uzi","vector","kriss",
+        "scorpion","vz61","bizon","pp2000","mpx","sten","owen","grease gun",
+        "cx4","mx4","mp18","mp28","mp34","pps43","m3","m3a1",
+        
+        -- === SHOTGUNS ===
+        "shotgun","shotty","pump","pumpaction","pump action","mossberg","remington",
+        "870","m870","500","590","benelli","m4super90","m1014","spas12","spas-12",
+        "doublebarrel","double barrel","sawnoff","sawed off","sawedoff","coach gun",
+        "aa12","striker","saiga","saiga12","ks23","toz","model 37","winchester",
+        "autoshotgun","auto shotgun","combat shotgun","tactical shotgun",
+        
+        -- === SNIPERS ===
+        "sniper","snipe","awp","awm","aws","l96","l96a1","m24","m40","m40a1","m40a5",
+        "intervention","r700","700","msr","cheytac","m200","m98b","m82","m107",
+        "barrett","50cal","50bmg","antimaterial","scout","ssg08","ssg","g22",
+        "dragunov","svd","svds","vss","vintorez","wa2000","psg1","msg90","dsr50",
+        "kar98 sniper","mosin sniper","springfield sniper","m1903 sniper",
+        
+        -- === LMG ===
+        "lmg","machinegun","machine gun","mg","m60","m60e4","m249","saw","m240","m240b",
+        "pkm","pk","rpd","rpk74","mg42","mg34","mg3","mg4","mg36","negev",
+        "stoner","mk46","mk48","hk21","m1919","browning","bren","bar","lewis",
+        "dp28","dp27","maxim","minigun","gatling","chaingun",
+        
+        -- === LAUNCHERS ===
+        "launcher","rpg","rpg7","rpg-7","rocket","rocketlauncher","bazooka","panzerfaust",
+        "at4","m72","law","smaw","javelin","stinger","igla","strela","m79","m203",
+        "gl","grenadelauncher","grenade launcher","china lake","milkor","mgl",
+        
+        -- === MELEE ===
+        "knife","knive","blade","dagger","machete","karambit","bayonet","bowie",
+        "sword","katana","wakizashi","tanto","ninjato","saber","sabre","rapier",
+        "axe","hatchet","tomahawk","cleaver","kukri","bolo","parang","golok",
+        "bat","baseball bat","crowbar","pipe","wrench combat","hammer combat",
+        "baton","nightstick","club","mace","flail","morningstar","brass knuckles",
+        "knuckles","fist","punch","melee",
+        
+        -- === EXPLOSIVES ===
+        "grenade","frag","fragmentation","flashbang","flash","smoke","molotov",
+        "c4","plastique","dynamite","tnt","bomb","explosive","mine","claymore",
+        "semtex","sticky","stickybomb","pipebomb","ied",
+        
+        -- === SPECIAL/ENERGY ===
+        "laser","lasergun","laserrifle","plasma","plasmagun","plasmarifle",
+        "railgun","gaussgun","coilgun","blaster","raygun","phaser","disruptor",
+        "tesla","lightning","electric","shock","stun","stungun","taser",
+        "flamethrower","flame","fire","incendiary","napalm",
+        "crossbow","bow","compound bow","recurve","longbow",
+        
+        -- === GENERIC ===
+        "gun","firearm","weapon","wpn","arm","arms","shooter","boomstick",
+        "piece","heater","strap","tool","gat","iron","steel","bang",
+        
+        -- === VIETNAMESE ===
+        "sung","sungtruong","sungdan","sungngan","sungluc","dao","kiem",
+        "bom","luu dan","vukhi","vu khi","sung may","sung ban tia",
+        
+        -- === GAME SPECIFIC COMMON ===
+        "peacekeeper","wingman","flatline","havoc","devotion","spitfire",
+        "mastiff","peacekeeper","eva8","eva-8","mozambique","pk","r99","r-99",
+        "car","car9","alternator","prowler","hemlock","g7","3030","bocek",
+        "charge rifle","sentinel","longbow","kraber","triple take",
+        "combat rifle","assault","marksman","heavy","light","energy",
+    },
+    
+    -- ★★★ WEAPON PARTS ★★★
+    Parts = {
+        "muzzle","barrel","bore","chamber","receiver","rail","picatinny",
+        "trigger","triggerguard","hammer","firing pin","bolt","boltcarrier",
+        "magazine","mag","clip","drum","ammo","ammunition","bullet","round","cartridge",
+        "scope","sight","optic","reddot","red dot","holographic","holo","acog","reflex","iron sight",
+        "silencer","suppressor","muzzle brake","compensator","flash hider","flashhider",
+        "grip","foregrip","vertgrip","angledgrip","pistolgrip","handguard",
+        "stock","buttstock","buffer","buffer tube","folding stock",
+        "bipod","tripod","laser","flashlight","light","tactical light",
+        "bayonet","grenade launcher","undermount","attachment",
+        "blade","edge","handle","hilt","guard","pommel","crossguard","tang",
+        "shell","casing","ejector","extractor","safety","selector","fire selector",
+    },
+    
+    -- ★★★ WEAPON SOUNDS ★★★
+    Sounds = {
+        "shoot","shot","fire","firing","gunshot","gunfire","bang","boom","blast",
+        "burst","auto","fullauto","semiauto","single","rapid",
+        "reload","reloading","chamber","cock","cocking","rack","racking",
+        "click","empty","dryfire","jam","malfunction",
+        "suppress","silenced","subsonic","supersonic","crack","snap",
+        "slash","swing","stab","slice","cut","chop","hack","strike","impact","hit",
+        "explosion","explode","detonate","fuse","beep","arm","disarm",
+        "draw","equip","holster","ready","aim","ads","zoom",
+    },
+    
+    -- ★★★ WEAPON EVENTS/REMOTES ★★★
+    Events = {
+        "fire","shoot","attack","damage","hit","kill","headshot",
+        "reload","reloading","ammo","magazine","clip",
+        "aim","ads","scope","zoom","hipfire",
+        "equip","unequip","draw","holster","swap","switch",
+        "bullet","projectile","raycast","ray","cast","trace","hitscan",
+        "melee","slash","stab","swing","strike","punch","kick",
+        "throw","grenade","explosive","detonate","explode",
+        "weapon","gun","firearm","tool","use","activate",
+    },
+    
+    -- ★★★ SAFE TOOLS (NOT WEAPONS) ★★★
+    Safe = {
+        "shovel","hoe","rake","seed","fertilizer","water can","watering",
+        "fishing rod","rod","fishingpole","pole","bait","tackle","net",
+        "bucket","pail","basket","bag","backpack","sack",
+        "wrench","screwdriver","plier","saw","drill","nails","hammer tool",
+        "paint","brush","roller","palette","canvas","easel",
+        "key","keycard","lockpick","card","badge","id",
+        "flashlight","torch","lantern","lamp","candle","lighter","match",
+        "camera","binocular","telescope","scope viewer","radar","detector",
+        "phone","radio","walkie","communicator","tablet","laptop",
+        "medkit","firstaid","bandage","medicine","syringe","pills","health",
+        "food","drink","water bottle","soda","juice","snack","meal","ration",
+        "money","cash","coin","dollar","credit","wallet","purse",
+        "book","map","compass","gps","note","paper","document","folder",
+        "instrument","guitar","piano","drum","flute","violin","music",
+        "toy","ball","frisbee","kite","balloon","plush","teddy",
+        "pet","leash","collar","bowl","treat","bone",
+        "flower","plant","pot","vase","decoration","furniture",
+        "rope","chain","wire","cable","tape","glue","string",
+    },
+}
+
+local function QuickMatch(str, patterns)
+    str = str:lower():gsub("[%-%_%.%s]", "")  -- Normalize: remove - _ . space
+    for _, p in ipairs(patterns) do
+        local pNorm = p:lower():gsub("[%-%_%.%s]", "")
+        if str:find(pNorm, 1, true) then return true end
+    end
+    return false
+end
+
+local function DeepMatch(str, patterns)
+    str = str:lower()
+    for _, p in ipairs(patterns) do
+        -- Exact match
+        if str == p:lower() then return true, 3 end
+        -- Contains match
+        if str:find(p:lower(), 1, true) then return true, 2 end
+        -- Fuzzy match (remove numbers, check root)
+        local strRoot = str:gsub("%d", "")
+        local pRoot = p:lower():gsub("%d", "")
+        if #pRoot >= 3 and strRoot:find(pRoot, 1, true) then return true, 1 end
+    end
+    return false, 0
+end
+
+local function AnalyzeWeapon(tool)
+    if not tool or not tool:IsA("Tool") then return false, 0, "none" end
+    
+    local cached = WPN_CACHE[tool]
+    if cached and (tick() - cached.time) < CACHE_TTL then
+        return cached.isWeapon, cached.score, cached.type
+    end
+    
+    local name = tool.Name
+    local nameLower = name:lower()
+    
+    -- Quick reject safe tools
+    if QuickMatch(nameLower, WPN_DB.Safe) then
+        WPN_CACHE[tool] = {isWeapon = false, score = 0, type = "safe", time = tick()}
+        return false, 0, "safe"
+    end
+    
+    local score = 0
+    local weaponType = "unknown"
+    
+    -- ★ Name analysis (HIGH WEIGHT)
+    local nameMatch, nameWeight = DeepMatch(nameLower, WPN_DB.Names)
+    if nameMatch then
+        score = score + 35 + (nameWeight * 5)
+        -- Determine type from name
+        if QuickMatch(nameLower, {"pistol","handgun","glock","deagle","revolver","1911","m9","usp","colt"}) then
+            weaponType = "pistol"
+        elseif QuickMatch(nameLower, {"rifle","ar15","m4","ak","scar","famas","aug","m16"}) then
+            weaponType = "rifle"
+        elseif QuickMatch(nameLower, {"smg","mp5","mp7","p90","uzi","vector","thompson"}) then
+            weaponType = "smg"
+        elseif QuickMatch(nameLower, {"shotgun","pump","mossberg","remington","spas","benelli"}) then
+            weaponType = "shotgun"
+        elseif QuickMatch(nameLower, {"sniper","awp","m24","barrett","intervention","scout","dragunov"}) then
+            weaponType = "sniper"
+        elseif QuickMatch(nameLower, {"lmg","machinegun","m60","m249","pkm","minigun"}) then
+            weaponType = "lmg"
+        elseif QuickMatch(nameLower, {"knife","sword","blade","katana","axe","machete","melee"}) then
+            weaponType = "melee"
+        elseif QuickMatch(nameLower, {"launcher","rpg","rocket","bazooka","grenade"}) then
+            weaponType = "launcher"
+        elseif QuickMatch(nameLower, {"laser","plasma","rail","blaster","ray"}) then
+            weaponType = "energy"
+        else
+            weaponType = "gun"
+        end
+    end
+    
+    -- ★ Descendant analysis (check first 50 for performance)
+    local ok, descs = pcall(function() return tool:GetDescendants() end)
+    if ok then
+        local checked = 0
+        for _, d in ipairs(descs) do
+            if checked > 50 then break end
+            checked = checked + 1
+            
+            local dn = d.Name:lower()
+            
+            -- Parts
+            if (d:IsA("BasePart") or d:IsA("Attachment") or d:IsA("Motor6D")) then
+                if QuickMatch(dn, WPN_DB.Parts) then
+                    score = score + 8
+                end
+            end
+            
+            -- Sounds
+            if d:IsA("Sound") then
+                if QuickMatch(dn, WPN_DB.Sounds) then
+                    score = score + 10
+                end
+            end
+            
+            -- Events/Functions
+            if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") or d:IsA("BindableEvent") then
+                if QuickMatch(dn, WPN_DB.Events) then
+                    score = score + 8
+                end
+            end
+            
+            -- Animations
+            if d:IsA("Animation") or d:IsA("AnimationTrack") then
+                if QuickMatch(dn, {"shoot","fire","reload","aim","recoil","attack","slash","swing"}) then
+                    score = score + 6
+                end
+            end
+            
+            -- Values (ammo, damage, etc)
+            if d:IsA("ValueBase") then
+                if QuickMatch(dn, {"ammo","damage","clip","magazine","bullet","range","firerate","rpm"}) then
+                    score = score + 7
+                end
+            end
+        end
+    end
+    
+    -- ★ Handle shape analysis
+    local handle = tool:FindFirstChild("Handle")
+    if handle and handle:IsA("BasePart") then
+        local s = handle.Size
+        local maxDim = max(s.X, s.Y, s.Z)
+        local minDim = max(min(s.X, s.Y, s.Z), 0.1)
+        local ratio = maxDim / minDim
+        
+        -- Long thin shape = likely gun/sword
+        if ratio > 4 then score = score + 8 end
+        if ratio > 6 then score = score + 5 end
+        
+        -- Check for mesh (weapons often have special meshes)
+        if handle:FindFirstChildOfClass("SpecialMesh") or handle:FindFirstChildOfClass("MeshPart") then
+            score = score + 3
+        end
+    end
+    
+    -- ★ Tool properties
+    if tool:FindFirstChild("Ammo") or tool:FindFirstChild("Magazine") or tool:FindFirstChild("Clip") then
+        score = score + 15
+    end
+    if tool.RequiresHandle == false then
+        score = score + 3  -- Many gun systems don't require handle
+    end
+    
+    -- ★ Final determination (LOWER THRESHOLD)
+    local isWeapon = score >= 20  -- Lowered from 28 to 20
+    if isWeapon and weaponType == "unknown" then
+        weaponType = "weapon"
+    end
+    
+    WPN_CACHE[tool] = {isWeapon = isWeapon, score = score, type = weaponType, time = tick()}
+    return isWeapon, score, weaponType
+end
+
+-- ═══════════ 🗺️ ZONE TRANSITION ENGINE ═══════════
+local ZONE_UNK, ZONE_SAFE, ZONE_GRACE, ZONE_COMBAT = 0, 1, 2, 3
+local GRACE_TIME = 10
+local ZoneStates = {}
+local ZoneCache = {}
+
+local SAFE_INDICATORS = {
+    Attrs = {"safe","safezone","insafezone","inlobby","inspawn","protected","nopvp","immune","invulnerable","invincible","godmode","inbase","inhome","inhouse","peaceful"},
+    Values = {"safezone","issafe","insafe","inlobby","inspawn","protected","immune","invulnerable","safe","nopvp","inbase"},
+    Tags = {"safe","safezone","protected","spawn","lobby","nopvp","immune","peaceful","base"},
+    Zones = {"safezone","safe zone","safe_zone","spawn","spawnpoint","lobby","hub","base","home","shop","store","bank","hospital","garage","apartment","house","checkpoint","greenzone","whitezone","protected","peacezone"},
+}
+
+local function CheckSafeZone(player)
+    local char = player.Character
+    if not char then return false end
+    
+    local uid = player.UserId
+    local cached = ZoneCache[uid]
+    if cached and (tick() - cached.time) < 1 then
+        return cached.safe
+    end
+    
+    -- ★ ForceField = definite safe
+    if char:FindFirstChildOfClass("ForceField") then
+        ZoneCache[uid] = {safe = true, time = tick()}
+        return true
+    end
+    
+    -- ★ Check attributes on player and character
+    for _, target in ipairs({player, char}) do
+        local ok, attrs = pcall(function() return target:GetAttributes() end)
+        if ok then
+            for name, val in pairs(attrs) do
+                if QuickMatch(name:lower(), SAFE_INDICATORS.Attrs) then
+                    if val == true or (type(val) == "number" and val > 0) or val == "true" or val == "yes" then
+                        ZoneCache[uid] = {safe = true, time = tick()}
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    
+    -- ★ Check value objects
+    for _, target in ipairs({player, char}) do
+        local ok, children = pcall(function() return target:GetChildren() end)
+        if ok then
+            for _, obj in ipairs(children) do
+                if obj:IsA("BoolValue") or obj:IsA("IntValue") or obj:IsA("NumberValue") or obj:IsA("StringValue") then
+                    if QuickMatch(obj.Name:lower(), SAFE_INDICATORS.Values) then
+                        local vok, vv = pcall(function() return obj.Value end)
+                        if vok then
+                            if (obj:IsA("BoolValue") and vv == true) or
+                               (obj:IsA("IntValue") and vv > 0) or
+                               (obj:IsA("NumberValue") and vv > 0) or
+                               (obj:IsA("StringValue") and (vv == "true" or vv == "yes" or vv == "1")) then
+                                ZoneCache[uid] = {safe = true, time = tick()}
+                                return true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- ★ Check tags
+    for _, target in ipairs({player, char}) do
+        local ok, tags = pcall(function() return CS:GetTags(target) end)
+        if ok then
+            for _, tag in ipairs(tags) do
+                if QuickMatch(tag:lower(), SAFE_INDICATORS.Tags) then
+                    ZoneCache[uid] = {safe = true, time = tick()}
+                    return true
+                end
+            end
+        end
+    end
+    
+    -- ★ Check if inside safe zone part (position-based)
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then
+        local pos = root.Position
+        local ok2, found = pcall(function()
+            -- Check workspace for safe zone parts
+            for _, part in ipairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and part.Anchored then
+                    local partName = part.Name:lower()
+                    if QuickMatch(partName, SAFE_INDICATORS.Zones) then
+                        -- Check if player is inside this part
+                        local cf, sz = part.CFrame, part.Size / 2
+                        local localPos = cf:PointToObjectSpace(pos)
+                        if abs(localPos.X) <= sz.X + 3 and abs(localPos.Y) <= sz.Y + 5 and abs(localPos.Z) <= sz.Z + 3 then
+                            return true
+                        end
+                    end
+                end
+            end
+            return false
+        end)
+        if ok2 and found then
+            ZoneCache[uid] = {safe = true, time = tick()}
+            return true
+        end
+    end
+    
+    ZoneCache[uid] = {safe = false, time = tick()}
+    return false
+end
+
+local function UpdateZoneState(uid, isSafe, now)
+    local prev = ZoneStates[uid] or {state = ZONE_UNK, changedAt = now, wasEverSafe = false}
+    local newState = prev.state
+    
+    if isSafe then
+        newState = ZONE_SAFE
+        prev.wasEverSafe = true
+    elseif prev.state == ZONE_SAFE then
+        -- ★ Just left safe zone → GRACE period
+        newState = ZONE_GRACE
+    elseif prev.state == ZONE_GRACE then
+        -- ★ In grace period, check if expired
+        if (now - prev.changedAt) > GRACE_TIME then
+            newState = ZONE_COMBAT
+        end
+    elseif prev.state == ZONE_UNK then
+        -- ★ Unknown → check if we've ever seen them in safe
+        if prev.wasEverSafe then
+            newState = ZONE_COMBAT  -- They were safe before, now not
+        else
+            -- First time seeing them, assume combat-ready
+            newState = ZONE_COMBAT
+        end
+    end
+    
+    local changed = newState ~= prev.state
+    ZoneStates[uid] = {
+        state = newState,
+        changedAt = changed and now or prev.changedAt,
+        graceRemain = newState == ZONE_GRACE and max(0, GRACE_TIME - (now - (changed and now or prev.changedAt))) or 0,
+        wasEverSafe = prev.wasEverSafe or isSafe,
+    }
+    
+    return ZoneStates[uid]
+end
+
+-- ═══════════ 🎯 THREAT ANALYZER ═══════════
+local THREAT_KW = {"wanted","bounty","criminal","jail","murder","kill","rob","hostile","enemy","outlaw","fugitive","suspect","felon","star","heat","crime"}
+
+local function AnalyzeThreat(player, pd)
+    local char = player.Character
+    if not char then return end
+    
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return end
+    
+    local now = tick()
+    local uid = player.UserId
+    
+    local isSafe = CheckSafeZone(player)
+    local zs = UpdateZoneState(uid, isSafe, now)
+    pd.zone = zs.state
+    pd.graceRemain = zs.graceRemain or 0
+    pd.inSafe = isSafe
+    
+    if zs.state == ZONE_SAFE then
+        pd.threat = 0
+        pd.isThreat = false
+        return
+    end
+    
+    local threat = 0
+    
+    -- ★ Zone-based threat (COMBAT or GRACE = threat)
+    if zs.state == ZONE_GRACE then
+        threat = threat + 30
+    elseif zs.state == ZONE_COMBAT then
+        threat = threat + 25
+    end
+    
+    -- ★ Weapon threat
+    local tool = char:FindFirstChildOfClass("Tool")
+    if tool then
+        local isW, wsc, wtype = AnalyzeWeapon(tool)
+        pd.weapon = tool.Name
+        pd.weaponType = wtype
+        pd.weaponScore = wsc
+        if isW then
+            threat = threat + 40
+            if wtype == "sniper" or wtype == "rifle" or wtype == "shotgun" then threat = threat + 10 end
+            if wtype == "launcher" or wtype == "lmg" then threat = threat + 15 end
+        elseif wsc >= 15 then
+            threat = threat + 20
+        elseif wsc >= 10 then
+            threat = threat + 10
+        end
+    else
+        pd.weapon = nil
+        pd.weaponType = nil
+        pd.weaponScore = 0
+    end
+    
+    -- ★ Leaderstat threat
+    local ls = player:FindFirstChild("leaderstats")
+    if ls then
+        for _, val in ipairs(ls:GetChildren()) do
+            if val:IsA("ValueBase") and QuickMatch(val.Name:lower(), THREAT_KW) then
+                local ok, v = pcall(function() return val.Value end)
+                if ok then
+                    if type(v) == "number" and v > 0 then
+                        threat = threat + 30 + min(floor(v / 3), 25)
+                    elseif v == true then
+                        threat = threat + 45
+                    elseif type(v) == "string" and v ~= "" and v ~= "0" and v:lower() ~= "false" then
+                        threat = threat + 35
+                    end
+                end
+            end
+        end
+    end
+    
+    pd.threat = threat
+    pd.isThreat = threat >= 25
+end
+
+-- ═══════════ 👁️ VISIBILITY ═══════════
+local function CheckVisibility(char, checkWall)
+    if not checkWall then return true end
+    
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return true end
+    
+    local myChar = LP.Character
+    local camPos = Cam.CFrame.Position
+    
+    local filter = {char, VR}
+    if myChar then table.insert(filter, myChar) end
+    
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = filter
+    params.IgnoreWater = true
+    
+    local target = root.Position + V3(0, 1.5, 0)
+    local dir = target - camPos
+    local dist = dir.Magnitude
+    
+    if dist > 0 and dist < 800 then
+        local result = workspace:Raycast(camPos, dir.Unit * dist, params)
+        return result == nil
+    end
+    
+    return true
+end
+
+-- ═══════════ UTILITIES ═══════════
+local function MyRoot() local c = LP.Character; return c and c:FindFirstChild("HumanoidRootPart") end
+local function GetDist(root) local mr = MyRoot(); if not mr or not root then return 9999 end; return (mr.Position - root.Position).Magnitude end
+local function HPColor(r) r = clamp(r, 0, 1); if r > 0.6 then return VN.AnToan elseif r > 0.3 then return VN.CanhBao else return VN.NguyHiem end end
+
+local function ShouldTarget(player, pd)
+    if player == LP then return false end
+    if Cfg.NhamTatCa then return true end
+    
+    local key = player.Team and player.Team.Name or "__NO_TEAM__"
+    local cfg = Cfg.Team[key] or Cfg.Team["__NO_TEAM__"]
+    
+    if not cfg then return true end  -- ★ Default to target if no config
+    if cfg.Mode == 0 then return false end
+    if cfg.Mode == 1 then return true end
+    if cfg.Mode == 2 then
+        -- ★ FIX: Target if threat OR in combat zone OR in grace period
+        return pd.isThreat or pd.zone == ZONE_COMBAT or pd.zone == ZONE_GRACE
+    end
+    
+    return true
+end
+
+-- ═══════════ PLAYER DATA ═══════════
+local function GetPlayerData(uid)
+    if not PData[uid] then
+        PData[uid] = {
+            lastUpdate = 0, lastThreat = 0, alive = false, target = false,
+            hbOn = false, espOn = false, dist = 9999, canSee = true, lastSeen = tick(),
+            threat = 0, isThreat = false, zone = ZONE_UNK, graceRemain = 0, inSafe = false,
+            weapon = nil, weaponType = nil, weaponScore = 0, espCache = {},
+            hp = 100, maxHp = 100, hpRatio = 1,
+        }
+    end
+    return PData[uid]
+end
+
+local function UpdatePlayer(player, now, fps)
+    local uid = player.UserId
+    local pd = GetPlayerData(uid)
+    
+    local baseRate = Cfg.Perf.UpdateRate
+    if Cfg.Perf.AdaptiveFPS then
+        if fps < 25 then baseRate = baseRate * 2.5
+        elseif fps < 35 then baseRate = baseRate * 1.8
+        elseif fps < 50 then baseRate = baseRate * 1.3 end
+    end
+    
+    local updateRate = pd.dist < 50 and baseRate * 0.4 or pd.dist < 150 and baseRate or baseRate * 1.5
+    
+    if (now - pd.lastUpdate) < updateRate then
+        return pd, false
+    end
+    pd.lastUpdate = now
+    
+    local char = player.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    pd.alive = char ~= nil and hum ~= nil and hum.Health > 0
+    
+    if not pd.alive then
+        pd.target = false
+        pd.hbOn = false
+        pd.espOn = false
+        return pd, true
+    end
+    
+    local root = char:FindFirstChild("HumanoidRootPart")
+    pd.dist = GetDist(root)
+    
+    pd.hp = hum.Health
+    pd.maxHp = max(hum.MaxHealth, 1)
+    pd.hpRatio = clamp(pd.hp / pd.maxHp, 0, 1)
+    
+    -- ★ Threat analysis
+    local threatRate = pd.dist < 100 and 0.3 or 0.6
+    if (now - pd.lastThreat) >= threatRate then
+        pd.lastThreat = now
+        pcall(AnalyzeThreat, player, pd)
+    end
+    
+    pd.target = ShouldTarget(player, pd)
+    
+    -- Visibility
+    if Cfg.HB.Wall then
+        local visible = CheckVisibility(char, true)
+        if visible then pd.canSee = true; pd.lastSeen = now
+        else pd.canSee = (now - pd.lastSeen) < 0.6 end
+    else
+        pd.canSee = true
+    end
+    
+    -- ★ FIX: Enable HB/ESP when target is valid (zone transition works)
+    pd.hbOn = Cfg.HB.On and pd.target and pd.canSee and pd.dist <= Cfg.HB.MaxD and not pd.inSafe
+    pd.espOn = Cfg.ESP.On and pd.target and pd.dist <= Cfg.ESP.MaxD
+    
+    return pd, true
+end
+
+local function ForceRecalcAll()
+    for uid, pd in pairs(PData) do
+        pd.lastUpdate = 0; pd.lastThreat = 0; pd.lastSeen = tick()
+        HBState[uid] = nil; pd.espCache = {}
+    end
+    WPN_CACHE = {}; ZoneCache = {}; ZoneStates = {}
+end
+
+-- ═══════════ 📦 HITBOX ENGINE (NO SHADOW MODE - ALWAYS EXPAND) ═══════════
+local function SaveHead(uid, head)
+    if not HeadBak[uid] then
+        HeadBak[uid] = {
+            Size = head.Size, Trans = head.Transparency,
+            CanCollide = head.CanCollide, CanQuery = head.CanQuery, Massless = head.Massless
+        }
+    end
+end
+
+local function RestoreHead(uid, head)
+    local bak = HeadBak[uid]
+    if not bak then return end
+    pcall(function()
+        head.Size = bak.Size; head.Transparency = bak.Trans
+        head.CanCollide = bak.CanCollide; head.CanQuery = bak.CanQuery; head.Massless = bak.Massless
+    end)
+end
+
+local function ApplyHitbox(player, pd)
+    local char = player.Character
+    if not char then return end
+    
+    local uid = player.UserId
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    
+    -- ★ FIX: ALWAYS EXPAND (no shadow mode) - this ensures damage works
+    local wantState = "off"
+    if pd.hbOn and pd.canSee then
+        wantState = "expand"  -- ★ Always expand, never shadow
+    end
+    
+    if HBState[uid] == wantState then return end
+    HBState[uid] = wantState
+    
+    local size = Cfg.HB.Size
+    if Cfg.HB.Adaptive then
+        local distFactor = clamp((pd.dist - 15) / 250, 0.5, 1.8)
+        size = floor(size * distFactor)
+        size = clamp(size, 8, 50)
+    end
+    
+    if wantState == "expand" then
+        SaveHead(uid, head)
+        pcall(function()
+            head.Size = V3(size, size, size)
+            head.Transparency = 1  -- ★ Invisible so doesn't block view
+            head.CanCollide = false
+            head.CanQuery = true  -- ★ CRITICAL: Must be true for raycast hits
+            head.Massless = true
+        end)
+    else
+        RestoreHead(uid, head)
+        HeadBak[uid] = nil
+    end
+end
+
+-- Hitbox visualization
+local function EnsureHBViz(uid)
+    if HBViz[uid] and HBViz[uid].Parent then return HBViz[uid] end
+    local f = Instance.new("Folder", VR); f.Name = "HB_" .. uid
+    local sb = Instance.new("SelectionBox", f); sb.Name = "Box"; sb.LineThickness = 0.035
+    HBViz[uid] = f; return f
+end
+
+local function UpdateHBViz(player, pd)
+    local uid = player.UserId
+    if not pd.hbOn or not pd.alive then
+        local f = HBViz[uid]; if f then local sb = f:FindFirstChild("Box"); if sb then sb.Adornee = nil end end
+        return
+    end
+    local f = EnsureHBViz(uid); local sb = f:FindFirstChild("Box")
+    local char = player.Character; local head = char and char:FindFirstChild("Head")
+    if not sb or not head then return end
+    
+    local col
+    if pd.zone == ZONE_GRACE then col = VN.CanhBao
+    elseif pd.zone == ZONE_COMBAT then col = VN.DacBiet
+    elseif pd.isThreat then col = VN.NguyHiem
+    else col = VN.Vang end
+    
+    sb.Adornee = head
+    sb.Color3 = col; sb.SurfaceColor3 = col; sb.SurfaceTransparency = Cfg.HB.Trans
+end
+
+-- ═══════════ 👁️ ESP ENGINE ═══════════
+local function EnsureESP(uid)
+    if ESPViz[uid] and ESPViz[uid].Parent then return ESPViz[uid] end
+    local f = Instance.new("Folder", VR); f.Name = "ESP_" .. uid
+    local hl = Instance.new("Highlight", f); hl.Name = "HL"; hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; hl.Enabled = false
+    local bg = Instance.new("BillboardGui", f); bg.Name = "BG"; bg.AlwaysOnTop = true; bg.Size = UD2(0, 180, 0, 120); bg.StudsOffset = V3(0, 3.2, 0); bg.MaxDistance = 2000; bg.Enabled = false
+    local ct = Instance.new("Frame", bg); ct.Name = "CT"; ct.Size = UD2(1, 0, 1, 0); ct.BackgroundTransparency = 1
+    local ly = Instance.new("UIListLayout", ct); ly.HorizontalAlignment = Enum.HorizontalAlignment.Center; ly.Padding = UDim.new(0, 2)
+    local function ML(nm, ord, h, sz) local l = Instance.new("TextLabel", ct); l.Name = nm; l.LayoutOrder = ord; l.Size = UD2(1, 0, 0, h); l.BackgroundTransparency = 1; l.Font = Enum.Font.GothamBold; l.TextSize = sz; l.TextStrokeTransparency = 0; l.TextStrokeColor3 = C3(0, 0, 0); l.RichText = true; l.Text = "" end
+    ML("NL", 1, 16, 13); ML("SL", 2, 14, 10); ML("WL", 3, 14, 11); ML("DL", 4, 14, 12); ML("HL2", 5, 12, 10)
+    local hpBg = Instance.new("Frame", ct); hpBg.Name = "HPBg"; hpBg.LayoutOrder = 6; hpBg.Size = UD2(0.7, 0, 0, 6); hpBg.BackgroundColor3 = C3(30, 10, 10); hpBg.BorderSizePixel = 0; Instance.new("UICorner", hpBg).CornerRadius = UDim.new(1, 0)
+    local hpF = Instance.new("Frame", hpBg); hpF.Name = "HPF"; hpF.Size = UD2(1, 0, 1, 0); hpF.BackgroundColor3 = VN.AnToan; hpF.BorderSizePixel = 0; Instance.new("UICorner", hpF).CornerRadius = UDim.new(1, 0)
+    ESPViz[uid] = f; return f
+end
+
+local function UpdateESP(player, pd)
+    local uid = player.UserId
+    if not pd.espOn or not pd.alive then
+        local f = ESPViz[uid]; if f then
+            local hl = f:FindFirstChild("HL"); if hl then hl.Enabled = false end
+            local bg = f:FindFirstChild("BG"); if bg then bg.Enabled = false end
+        end; return
+    end
+    local f = EnsureESP(uid); local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    
+    local cache = pd.espCache
+    local tool = char:FindFirstChildOfClass("Tool")
+    local toolName = tool and tool.Name or ""
+    if cache.hp == floor(pd.hp) and cache.zone == pd.zone and cache.weapon == toolName and abs((cache.dist or 0) - pd.dist) < 15 then return end
+    cache.hp = floor(pd.hp); cache.zone = pd.zone; cache.weapon = toolName; cache.dist = pd.dist
+    
+    local dist = pd.dist
+    local fade = Cfg.ESP.Fade and clamp((dist - Cfg.ESP.NearD) / max(Cfg.ESP.FarD - Cfg.ESP.NearD, 1), 0, 1) or 0
+    local hpC = HPColor(pd.hpRatio)
+    local baseCol
+    if pd.zone == ZONE_SAFE then baseCol = VN.ChuMo
+    elseif pd.zone == ZONE_GRACE then baseCol = VN.CanhBao
+    elseif pd.zone == ZONE_COMBAT then baseCol = VN.DacBiet
+    elseif pd.isThreat then baseCol = VN.NguyHiem
+    else baseCol = VN.Vang end
+    local tf = max(fade * 0.5, 0.08)
+    
+    local hl = f:FindFirstChild("HL")
+    if hl and Cfg.ESP.HL then
+        hl.Enabled = true; hl.Adornee = char; hl.FillColor = baseCol
+        hl.OutlineColor = pd.isThreat and VN.NguyHiem or VN.Vang
+        hl.FillTransparency = max(0.12, fade * 0.65); hl.OutlineTransparency = fade * 0.5
+    elseif hl then hl.Enabled = false end
+    
+    local bg = f:FindFirstChild("BG"); if bg then bg.Adornee = root; bg.Enabled = true end
+    local ct = bg and bg:FindFirstChild("CT"); if not ct then return end
+    local function SL(nm, txt, col) local l = ct:FindFirstChild(nm); if l then l.Text = txt; if col then l.TextColor3 = col end; l.TextTransparency = tf; l.Visible = txt ~= "" end end
+    
+    if Cfg.ESP.Name then
+        local tag = pd.isThreat and string.format(' <font color="#FF5050">[⚠%d]</font>', floor(pd.threat)) or ""
+        SL("NL", string.format("<b>%s</b>%s", player.Name, tag), baseCol)
+    else SL("NL", "") end
+    
+    if Cfg.ESP.Status then
+        local status = ""
+        if pd.zone == ZONE_SAFE then status = '<font color="#888888">🛡️ AN TOÀN</font>'
+        elseif pd.zone == ZONE_GRACE then status = string.format('<font color="#FF8800">⏱️ GRACE %ds</font>', floor(pd.graceRemain))
+        elseif pd.zone == ZONE_COMBAT then status = '<font color="#AA66FF">⚔️ CHIẾN ĐẤU</font>'
+        elseif pd.isThreat then status = '<font color="#FF4444">⚠️ NGUY HIỂM</font>' end
+        SL("SL", status)
+    else SL("SL", "") end
+    
+    if Cfg.ESP.Wpn and pd.weapon then
+        local wIcon = pd.weaponType == "pistol" and "🔫" or pd.weaponType == "rifle" and "🎯" or pd.weaponType == "sniper" and "🔭" or pd.weaponType == "shotgun" and "💥" or pd.weaponType == "melee" and "🗡️" or pd.weaponType == "launcher" and "🚀" or "📦"
+        local wColor = pd.weaponScore >= 25 and "#FF4400" or pd.weaponScore >= 15 and "#FF8800" or pd.weaponScore >= 10 and "#FFCC00" or "#888888"
+        SL("WL", string.format('<font color="%s">%s %s [%d]</font>', wColor, wIcon, pd.weapon, pd.weaponScore))
+    else SL("WL", "") end
+    
+    if Cfg.ESP.Dist then SL("DL", string.format("%.0f m", dist), VN.AnToan:Lerp(VN.NguyHiem, clamp(dist / Cfg.ESP.MaxD, 0, 1)))
+    else SL("DL", "") end
+    
+    if Cfg.ESP.HP then
+        local hpHex = string.format("#%02X%02X%02X", floor(hpC.R * 255), floor(hpC.G * 255), floor(hpC.B * 255))
+        SL("HL2", string.format('<font color="%s">%.0f/%.0f HP</font>', hpHex, pd.hp, pd.maxHp))
+    else SL("HL2", "") end
+    
+    local hpBg2 = ct:FindFirstChild("HPBg"); local hpFill = hpBg2 and hpBg2:FindFirstChild("HPF")
+    if hpBg2 and Cfg.ESP.HP then hpBg2.Visible = true; if hpFill then hpFill.Size = UD2(pd.hpRatio, 0, 1, 0); hpFill.BackgroundColor3 = hpC end
+    elseif hpBg2 then hpBg2.Visible = false end
+end
+
+-- ═══════════ CLEANUP ═══════════
+local function FullCleanup(player)
+    local uid = player.UserId; HBState[uid] = nil
+    local char = player.Character; if char then local h = char:FindFirstChild("Head"); if h then RestoreHead(uid, h) end end
+    HeadBak[uid] = nil; PData[uid] = nil; ZoneStates[uid] = nil; ZoneCache[uid] = nil
+end
+
+local function HideVisuals(uid)
+    local hb = HBViz[uid]; if hb then local sb = hb:FindFirstChild("Box"); if sb then sb.Adornee = nil end end
+    local esp = ESPViz[uid]; if esp then local hl = esp:FindFirstChild("HL"); if hl then hl.Enabled = false end; local bg = esp:FindFirstChild("BG"); if bg then bg.Enabled = false end end
+end
+
+local function HookPlayer(player)
+    table.insert(Conns, player.CharacterAdded:Connect(function()
+        local uid = player.UserId; HeadBak[uid] = nil; HBState[uid] = nil; HideVisuals(uid)
+        local pd = GetPlayerData(uid); pd.lastUpdate = 0; pd.lastThreat = 0; pd.lastSeen = tick(); pd.espCache = {}
+    end))
+    table.insert(Conns, player.CharacterRemoving:Connect(function() FullCleanup(player) end))
+end
+
+local function SyncTeams()
+    for _, t in ipairs(Teams:GetChildren()) do
+        if t:IsA("Team") and not Cfg.Team[t.Name] then
+            Cfg.Team[t.Name] = {Mode = 0, Color = t.TeamColor.Color}
+        end
+    end
+    Cfg.Team["__NO_TEAM__"] = Cfg.Team["__NO_TEAM__"] or {Mode = 0, Color = Color3.new(1, 1, 1)}
+end
+SyncTeams()
+table.insert(Conns, Teams.ChildAdded:Connect(SyncTeams))
+for _, p in ipairs(Players:GetPlayers()) do HookPlayer(p) end
+table.insert(Conns, Players.PlayerAdded:Connect(HookPlayer))
+table.insert(Conns, Players.PlayerRemoving:Connect(function(p)
+    FullCleanup(p); local uid = p.UserId
+    if HBViz[uid] then pcall(function() HBViz[uid]:Destroy() end); HBViz[uid] = nil end
+    if ESPViz[uid] then pcall(function() ESPViz[uid]:Destroy() end); ESPViz[uid] = nil end
+end))
+
+-- ═══════════ 🇻🇳 UI VIỆT NAM 🇻🇳 ═══════════
+local function BuildUI()
+    local Gui = Instance.new("ScreenGui", CoreGui); Gui.Name = "Flow_VN_v61"; Gui.ResetOnSpawn = false; Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; Gui.DisplayOrder = 100
+    
+    local Main = Instance.new("Frame", Gui); Main.Name = "Main"; Main.Size = UD2(0, 360, 0, 500); Main.Position = UD2(0.5, -180, 0.5, -250)
+    Main.BackgroundColor3 = VN.Nen; Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true; Main.Visible = false
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 16); Instance.new("UIStroke", Main).Color = VN.Do
+    Instance.new("UIGradient", Main).Color = ColorSequence.new{ColorSequenceKeypoint.new(0, C3(18, 9, 9)), ColorSequenceKeypoint.new(1, C3(10, 5, 5))}
+    
+    -- Header
+    local Hdr = Instance.new("Frame", Main); Hdr.Size = UD2(1, 0, 0, 52); Hdr.BackgroundColor3 = VN.Do; Hdr.BorderSizePixel = 0
+    Instance.new("UICorner", Hdr).CornerRadius = UDim.new(0, 16)
+    local HFix = Instance.new("Frame", Hdr); HFix.Size = UD2(1, 0, 0, 16); HFix.Position = UD2(0, 0, 1, -16); HFix.BackgroundColor3 = VN.Do; HFix.BorderSizePixel = 0
+    Instance.new("UIGradient", Hdr).Color = ColorSequence.new{ColorSequenceKeypoint.new(0, VN.Do), ColorSequenceKeypoint.new(0.5, VN.DoSang), ColorSequenceKeypoint.new(1, VN.Do)}
+    local FI = Instance.new("TextLabel", Hdr); FI.Size = UD2(0, 28, 0, 28); FI.Position = UD2(0, 12, 0.5, -14); FI.BackgroundTransparency = 1; FI.Text = "🇻🇳"; FI.TextSize = 20
+    local TL = Instance.new("TextLabel", Hdr); TL.Size = UD2(1, -100, 0, 24); TL.Position = UD2(0, 45, 0, 8); TL.BackgroundTransparency = 1; TL.Text = "⚡ FLOW v6.1"; TL.Font = Enum.Font.GothamBlack; TL.TextSize = 18; TL.TextColor3 = VN.Vang; TL.TextXAlignment = Enum.TextXAlignment.Left
+    local ST = Instance.new("TextLabel", Hdr); ST.Size = UD2(0, 150, 0, 14); ST.Position = UD2(0, 45, 0, 32); ST.BackgroundTransparency = 1; ST.Text = "🐉 HỒNG LONG VN"; ST.Font = Enum.Font.GothamMedium; ST.TextSize = 9; ST.TextColor3 = VN.VangSang; ST.TextXAlignment = Enum.TextXAlignment.Left
+    local CB = Instance.new("TextButton", Hdr); CB.Size = UD2(0, 28, 0, 28); CB.Position = UD2(1, -38, 0.5, -14); CB.Text = "✕"; CB.TextColor3 = VN.Vang; CB.Font = Enum.Font.GothamBold; CB.TextSize = 14; CB.BackgroundColor3 = VN.DoTham; CB.BorderSizePixel = 0; CB.AutoButtonColor = false
+    Instance.new("UICorner", CB).CornerRadius = UDim.new(0, 8)
+    CB.MouseEnter:Connect(function() TwSpring(CB, {BackgroundColor3 = VN.NguyHiem}, 0.2) end)
+    CB.MouseLeave:Connect(function() Tw(CB, {BackgroundColor3 = VN.DoTham}, 0.2) end)
+    CB.MouseButton1Click:Connect(function() TwSpring(Main, {Size = UD2(0, 340, 0, 480)}, 0.1); task.wait(0.1); Main.Visible = false; Main.Size = UD2(0, 360, 0, 500) end)
+    
+    -- Tab Bar
+    local TB = Instance.new("Frame", Main); TB.Size = UD2(1, -14, 0, 38); TB.Position = UD2(0, 7, 0, 58); TB.BackgroundColor3 = VN.NenNhat; TB.BorderSizePixel = 0
+    Instance.new("UICorner", TB).CornerRadius = UDim.new(0, 10); Instance.new("UIStroke", TB).Color = VN.Vien
+    local tbLy = Instance.new("UIListLayout", TB); tbLy.FillDirection = Enum.FillDirection.Horizontal; tbLy.HorizontalAlignment = Enum.HorizontalAlignment.Center; tbLy.VerticalAlignment = Enum.VerticalAlignment.Center; tbLy.Padding = UDim.new(0, 4)
+    
+    local Content = Instance.new("Frame", Main); Content.Size = UD2(1, -14, 1, -145); Content.Position = UD2(0, 7, 0, 102); Content.BackgroundTransparency = 1; Content.ClipsDescendants = true
+    
+    local SBar = Instance.new("Frame", Main); SBar.Size = UD2(1, -14, 0, 28); SBar.Position = UD2(0, 7, 1, -35); SBar.BackgroundColor3 = VN.NenNhat; SBar.BorderSizePixel = 0
+    Instance.new("UICorner", SBar).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", SBar).Color = VN.Vien
+    local SLbl = Instance.new("TextLabel", SBar); SLbl.Size = UD2(1, -12, 1, 0); SLbl.Position = UD2(0, 6, 0, 0); SLbl.BackgroundTransparency = 1; SLbl.Text = "🇻🇳 FLOW v6.1 — Sẵn sàng!"; SLbl.Font = Enum.Font.GothamMedium; SLbl.TextSize = 10; SLbl.TextColor3 = VN.ChuMo; SLbl.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local tabs = {}
+    local function MkScroll()
+        local s = Instance.new("ScrollingFrame", Content); s.Size = UD2(1, 0, 1, 0); s.BackgroundTransparency = 1; s.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        s.ScrollBarThickness = 4; s.ScrollBarImageColor3 = VN.Do; s.BorderSizePixel = 0; s.Visible = false; s.CanvasSize = UD2(0, 0, 0, 0)
+        local ly = Instance.new("UIListLayout", s); ly.Padding = UDim.new(0, 5); ly.SortOrder = Enum.SortOrder.LayoutOrder; Instance.new("UIPadding", s).PaddingTop = UDim.new(0, 4)
+        return s
+    end
+    local function MkTab(nm, ic)
+        local btn = Instance.new("TextButton", TB); btn.Size = UD2(0, 105, 0, 32); btn.Text = ic .. " " .. nm; btn.Font = Enum.Font.GothamBold; btn.TextSize = 11; btn.TextColor3 = VN.ChuToi
+        btn.BackgroundColor3 = VN.Nen; btn.BackgroundTransparency = 0.5; btn.BorderSizePixel = 0; btn.AutoButtonColor = false; Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+        local ind = Instance.new("Frame", btn); ind.Size = UD2(0.4, 0, 0, 3); ind.Position = UD2(0.3, 0, 1, -4); ind.BackgroundColor3 = VN.Vang; ind.BorderSizePixel = 0; ind.Visible = false; Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
+        local scr = MkScroll(); tabs[nm] = {btn = btn, ind = ind, scroll = scr}
+        btn.MouseEnter:Connect(function() if not ind.Visible then Tw(btn, {BackgroundTransparency = 0.3}, 0.15) end end)
+        btn.MouseLeave:Connect(function() if not ind.Visible then Tw(btn, {BackgroundTransparency = 0.5}, 0.15) end end)
+        btn.MouseButton1Click:Connect(function()
+            for n, d in pairs(tabs) do local a = (n == nm); d.scroll.Visible = a; d.ind.Visible = a; Tw(d.btn, {TextColor3 = a and VN.Vang or VN.ChuToi, BackgroundColor3 = a and C3(60, 25, 22) or VN.Nen, BackgroundTransparency = a and 0.1 or 0.5}, 0.2) end
+        end)
+        return scr
+    end
+    
+    local function Card(p, h) local f = Instance.new("Frame", p); f.Size = UD2(1, -4, 0, h or 40); f.BackgroundColor3 = VN.NenNhat; f.BackgroundTransparency = 0.15; f.BorderSizePixel = 0; Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10); return f end
+    local function Section(p, t) local f = Card(p, 26); f.BackgroundColor3 = C3(60, 22, 18); local l = Instance.new("TextLabel", f); l.Size = UD2(1, -14, 1, 0); l.Position = UD2(0, 7, 0, 0); l.BackgroundTransparency = 1; l.Text = t; l.Font = Enum.Font.GothamBold; l.TextSize = 11; l.TextColor3 = VN.Vang; l.TextXAlignment = Enum.TextXAlignment.Left end
+    local function Toggle(p, lbl, init, cb, col)
+        col = col or VN.Do; local f = Card(p, 40)
+        local txt = Instance.new("TextLabel", f); txt.Size = UD2(1, -65, 1, 0); txt.Position = UD2(0, 10, 0, 0); txt.BackgroundTransparency = 1; txt.Text = lbl; txt.Font = Enum.Font.Gotham; txt.TextSize = 12; txt.TextColor3 = init and VN.Chu or VN.ChuMo; txt.TextXAlignment = Enum.TextXAlignment.Left
+        local trk = Instance.new("Frame", f); trk.Size = UD2(0, 44, 0, 22); trk.Position = UD2(1, -54, 0.5, -11); trk.BackgroundColor3 = init and col or C3(50, 35, 35); trk.BorderSizePixel = 0; Instance.new("UICorner", trk).CornerRadius = UDim.new(1, 0)
+        local thb = Instance.new("Frame", trk); thb.Size = UD2(0, 16, 0, 16); thb.Position = init and UD2(1, -19, 0.5, -8) or UD2(0, 3, 0.5, -8); thb.BackgroundColor3 = init and Color3.new(1, 1, 1) or C3(150, 130, 130); thb.BorderSizePixel = 0; Instance.new("UICorner", thb).CornerRadius = UDim.new(1, 0)
+        local on = init; local btn = Instance.new("TextButton", f); btn.Size = UD2(1, 0, 1, 0); btn.BackgroundTransparency = 1; btn.Text = ""; btn.ZIndex = 5
+        btn.MouseButton1Click:Connect(function() on = not on; TwSpring(trk, {BackgroundColor3 = on and col or C3(50, 35, 35)}, 0.2); TwSpring(thb, {Position = on and UD2(1, -19, 0.5, -8) or UD2(0, 3, 0.5, -8), BackgroundColor3 = on and Color3.new(1, 1, 1) or C3(150, 130, 130)}, 0.2); Tw(txt, {TextColor3 = on and VN.Chu or VN.ChuMo}, 0.15); cb(on) end)
+    end
+    local function Slider(p, lbl, mn, mx, def, dp, cb)
+        local f = Card(p, 52)
+        local txt = Instance.new("TextLabel", f); txt.Size = UD2(0.6, 0, 0, 18); txt.Position = UD2(0, 10, 0, 4); txt.BackgroundTransparency = 1; txt.Text = lbl; txt.Font = Enum.Font.Gotham; txt.TextSize = 11; txt.TextColor3 = VN.ChuMo; txt.TextXAlignment = Enum.TextXAlignment.Left
+        local vt = Instance.new("TextLabel", f); vt.Size = UD2(0.35, 0, 0, 18); vt.Position = UD2(0.63, 0, 0, 4); vt.BackgroundTransparency = 1; vt.Text = tostring(def); vt.Font = Enum.Font.GothamBold; vt.TextSize = 12; vt.TextColor3 = VN.Vang; vt.TextXAlignment = Enum.TextXAlignment.Right
+        local trk = Instance.new("Frame", f); trk.Size = UD2(1, -20, 0, 8); trk.Position = UD2(0, 10, 0, 32); trk.BackgroundColor3 = C3(40, 18, 18); trk.BorderSizePixel = 0; Instance.new("UICorner", trk).CornerRadius = UDim.new(1, 0)
+        local fill = Instance.new("Frame", trk); fill.Size = UD2((def - mn) / max(mx - mn, 1), 0, 1, 0); fill.BackgroundColor3 = VN.Do; fill.BorderSizePixel = 0; Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+        Instance.new("UIGradient", fill).Color = ColorSequence.new{ColorSequenceKeypoint.new(0, VN.Do), ColorSequenceKeypoint.new(0.6, VN.DoSang), ColorSequenceKeypoint.new(1, VN.Vang)}
+        local thb = Instance.new("TextButton", trk); thb.Size = UD2(0, 16, 0, 16); thb.Position = UD2((def - mn) / max(mx - mn, 1), -8, 0.5, -8); thb.BackgroundColor3 = VN.Vang; thb.Text = ""; thb.BorderSizePixel = 0; thb.ZIndex = 5; Instance.new("UICorner", thb).CornerRadius = UDim.new(1, 0)
+        local prec = 10 ^ dp; local drag = false
+        local function upd(ix) local tw = trk.AbsoluteSize.X; if tw <= 0 then return end; local rel = clamp((ix - trk.AbsolutePosition.X) / tw, 0, 1); local v = floor((mn + (mx - mn) * rel) * prec + 0.5) / prec; Tw(fill, {Size = UD2(rel, 0, 1, 0)}, 0.08); Tw(thb, {Position = UD2(rel, -8, 0.5, -8)}, 0.08); vt.Text = tostring(v); cb(v) end
+        thb.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then drag = true end end)
+        trk.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then drag = true; upd(i.Position.X) end end)
+        UIS.InputChanged:Connect(function(i) if drag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then upd(i.Position.X) end end)
+        UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then drag = false end end)
+    end
+    local function InfoCard(p, t, c) local f = Card(p, 50); f.BackgroundColor3 = C3(12, 20, 12); local l = Instance.new("TextLabel", f); l.Size = UD2(1, -14, 1, -6); l.Position = UD2(0, 7, 0, 3); l.BackgroundTransparency = 1; l.Text = t; l.Font = Enum.Font.Gotham; l.TextSize = 10; l.TextColor3 = c or VN.AnToan; l.TextXAlignment = Enum.TextXAlignment.Left; l.TextWrapped = true; l.RichText = true end
+    
+    -- Create Tabs
+    local tT = MkTab("MỤC TIÊU", "🎯"); local tH = MkTab("HITBOX", "📦"); local tE = MkTab("ESP", "👁")
+    tabs["MỤC TIÊU"].scroll.Visible = true; tabs["MỤC TIÊU"].ind.Visible = true; tabs["MỤC TIÊU"].btn.TextColor3 = VN.Vang; tabs["MỤC TIÊU"].btn.BackgroundColor3 = C3(60, 25, 22); tabs["MỤC TIÊU"].btn.BackgroundTransparency = 0.1
+    
+    -- TAB: MỤC TIÊU
+    Section(tT, "🎯 CHẾ ĐỘ NHẮM MỤC TIÊU")
+    Toggle(tT, "⚡ Nhắm TẤT CẢ (bỏ qua Team)", Cfg.NhamTatCa, function(v) Cfg.NhamTatCa = v; ForceRecalcAll() end, VN.NguyHiem)
+    Section(tT, "🏴 TEAM — TẮT → TẤT CẢ → ĐE DỌA")
+    InfoCard(tT, '<font color="#FF5050">🔴 TẮT</font> — Bỏ qua team\n<font color="#50FF50">🟢 TẤT CẢ</font> — Nhắm mọi người\n<font color="#FFAA00">🟠 ĐE DỌA</font> — Vũ khí/rời zone → Enemy', C3(180, 220, 160))
+    local mL = {[0] = "TẮT", [1] = "TẤT CẢ", [2] = "ĐE DỌA"}; local mC = {[0] = C3(70, 50, 50), [1] = VN.AnToan, [2] = VN.CanhBao}
+    for tn, td in pairs(Cfg.Team) do
+        local dn = tn == "__NO_TEAM__" and "🚫 Không Team" or tn; local f = Card(tT, 38)
+        local dot = Instance.new("Frame", f); dot.Size = UD2(0, 10, 0, 10); dot.Position = UD2(0, 10, 0.5, -5); dot.BackgroundColor3 = td.Color; dot.BorderSizePixel = 0; Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+        local nl = Instance.new("TextLabel", f); nl.Size = UD2(0.5, 0, 1, 0); nl.Position = UD2(0, 26, 0, 0); nl.BackgroundTransparency = 1; nl.Text = dn; nl.Font = Enum.Font.Gotham; nl.TextSize = 11; nl.TextColor3 = VN.Chu; nl.TextXAlignment = Enum.TextXAlignment.Left
+        local mb = Instance.new("TextButton", f); mb.Size = UD2(0, 78, 0, 24); mb.Position = UD2(1, -88, 0.5, -12); mb.Text = mL[td.Mode]; mb.TextColor3 = Color3.new(1, 1, 1); mb.Font = Enum.Font.GothamBold; mb.TextSize = 10; mb.BackgroundColor3 = mC[td.Mode]; mb.BorderSizePixel = 0; mb.AutoButtonColor = false; Instance.new("UICorner", mb).CornerRadius = UDim.new(0, 7)
+        mb.MouseButton1Click:Connect(function() td.Mode = (td.Mode + 1) % 3; mb.Text = mL[td.Mode]; TwSpring(mb, {BackgroundColor3 = mC[td.Mode]}, 0.2); ForceRecalcAll() end)
+    end
+    
+    -- TAB: HITBOX
+    Section(tH, "📦 HITBOX EXPANDER")
+    Toggle(tH, "🔥 Bật Hitbox", Cfg.HB.On, function(v) Cfg.HB.On = v; ForceRecalcAll() end, VN.Do)
+    Toggle(tH, "🧱 Kiểm tra tường (Wall)", Cfg.HB.Wall, function(v) Cfg.HB.Wall = v; ForceRecalcAll() end)
+    Toggle(tH, "🎚️ Tự động size theo KC", Cfg.HB.Adaptive, function(v) Cfg.HB.Adaptive = v end, VN.DacBiet)
+    Section(tH, "⚙️ CÀI ĐẶT HITBOX")
+    Slider(tH, "📐 Kích thước", 1, 50, Cfg.HB.Size, 0, function(v) Cfg.HB.Size = v end)
+    Slider(tH, "👻 Trong suốt viền", 0, 1, Cfg.HB.Trans, 2, function(v) Cfg.HB.Trans = v end)
+    Slider(tH, "📏 KC tối đa", 50, 500, Cfg.HB.MaxD, 0, function(v) Cfg.HB.MaxD = v; ForceRecalcAll() end)
+    InfoCard(tH, '🟡 Bình thường  🔴 Đe dọa  🟣 Chiến đấu  🟠 Grace\n★ Hitbox LUÔN expand → gây damage khi bắn', C3(180, 200, 160))
+    
+    -- TAB: ESP
+    Section(tE, "👁 ESP ENGINE")
+    Toggle(tE, "🔥 Bật ESP", Cfg.ESP.On, function(v) Cfg.ESP.On = v; ForceRecalcAll() end, VN.Do)
+    Toggle(tE, "🌫️ Mờ dần theo KC", Cfg.ESP.Fade, function(v) Cfg.ESP.Fade = v end)
+    Section(tE, "📊 HIỂN THỊ")
+    Toggle(tE, "✨ Highlight", Cfg.ESP.HL, function(v) Cfg.ESP.HL = v end, VN.Vang)
+    Toggle(tE, "📛 Tên + Threat", Cfg.ESP.Name, function(v) Cfg.ESP.Name = v end, VN.AnToan)
+    Toggle(tE, "🔫 Vũ khí (200+ loại)", Cfg.ESP.Wpn, function(v) Cfg.ESP.Wpn = v end, VN.CanhBao)
+    Toggle(tE, "📏 Khoảng cách", Cfg.ESP.Dist, function(v) Cfg.ESP.Dist = v end)
+    Toggle(tE, "❤️ HP", Cfg.ESP.HP, function(v) Cfg.ESP.HP = v end, VN.NguyHiem)
+    Toggle(tE, "🗺️ Zone Status", Cfg.ESP.Status, function(v) Cfg.ESP.Status = v end, VN.CanhBao)
+    Slider(tE, "📏 KC tối đa ESP", 100, 2000, Cfg.ESP.MaxD, 0, function(v) Cfg.ESP.MaxD = v; ForceRecalcAll() end)
+    
+    -- Float Button
+    local Fl = Instance.new("TextButton", Gui); Fl.Size = UD2(0, 48, 0, 48); Fl.Position = UD2(0, 10, 0.35, 0); Fl.BackgroundColor3 = VN.Do; Fl.Text = "★"; Fl.TextColor3 = VN.Vang; Fl.Font = Enum.Font.GothamBlack; Fl.TextSize = 22; Fl.BorderSizePixel = 0; Fl.ZIndex = 50; Fl.AutoButtonColor = false
+    Instance.new("UICorner", Fl).CornerRadius = UDim.new(1, 0); Instance.new("UIStroke", Fl).Color = VN.Vang
+    local fg = Instance.new("UIGradient", Fl); fg.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, VN.Do), ColorSequenceKeypoint.new(0.5, VN.DoSang), ColorSequenceKeypoint.new(1, VN.Do)}; fg.Rotation = 45
+    local fd, fds, fps = false, nil, nil
+    Fl.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then fd = true; fds = i.Position; fps = Fl.Position end end)
+    Fl.InputChanged:Connect(function(i) if fd and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then local d = i.Position - fds; Fl.Position = UD2(fps.X.Scale, fps.X.Offset + d.X, fps.Y.Scale, fps.Y.Offset + d.Y) end end)
+    Fl.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then if fds then local d = i.Position - fds; if abs(d.X) < 10 and abs(d.Y) < 10 then if Main.Visible then TwSpring(Main, {Size = UD2(0, 340, 0, 480)}, 0.15); task.wait(0.15); Main.Visible = false; Main.Size = UD2(0, 360, 0, 500) else Main.Visible = true; Main.Size = UD2(0, 340, 0, 480); TwSpring(Main, {Size = UD2(0, 360, 0, 500)}, 0.25) end end end; fd = false end end)
+    task.spawn(function() local big = true; while Fl.Parent do if big then TwSpring(Fl, {TextSize = 26, Rotation = 5}, 0.6) else TwSpring(Fl, {TextSize = 22, Rotation = -5}, 0.6) end; big = not big; task.wait(0.8) end end)
+    task.spawn(function() local rot = 0; while Fl.Parent do rot = (rot + 2) % 360; fg.Rotation = rot; task.wait(0.05) end end)
+    table.insert(Conns, UIS.InputBegan:Connect(function(i, gp) if gp then return end; if i.KeyCode == Enum.KeyCode.RightControl or i.KeyCode == Enum.KeyCode.F6 then Main.Visible = not Main.Visible end end))
+    
+    return SLbl
+end
+local SLbl = BuildUI()
+
+-- ═══════════ MAIN LOOP ═══════════
+local fc, fps, lft, lup, pi = 0, 60, tick(), 0, 1
+local heartbeat = RS.Heartbeat:Connect(function()
+    local now = tick(); local dt = now - lft; lft = now; fps = fps * 0.92 + (1 / max(dt, 0.001)) * 0.08
+    local ur = Cfg.Perf.UpdateRate; if Cfg.Perf.AdaptiveFPS then if fps < 25 then ur = ur * 2.5 elseif fps < 35 then ur = ur * 1.8 elseif fps < 50 then ur = ur * 1.3 end end
+    if (now - lup) < ur then return end; lup = now
+    
+    local allP = Players:GetPlayers(); local op = {}; for _, p in ipairs(allP) do if p ~= LP then table.insert(op, p) end end
+    local mr = MyRoot(); if mr then table.sort(op, function(a, b) local cA, cB = a.Character, b.Character; if not cA then return false end; if not cB then return true end; local rA, rB = cA:FindFirstChild("HumanoidRootPart"), cB:FindFirstChild("HumanoidRootPart"); if not rA then return false end; if not rB then return true end; return (rA.Position - mr.Position).Magnitude < (rB.Position - mr.Position).Magnitude end) end
+    
+    local budget = min(#op, Cfg.Perf.MaxPlayers, fps > 45 and 6 or fps > 30 and 4 or 3); local tc = 0
+    for i = 1, budget do local p = op[i]; if not p then continue end; local pd, upd = UpdatePlayer(p, now, fps); if not pd.alive then HideVisuals(p.UserId); continue end; if upd then ApplyHitbox(p, pd); UpdateHBViz(p, pd); UpdateESP(p, pd) end; if pd.target then tc = tc + 1 end end
+    
+    fc = fc + 1; if fc % 20 == 0 and SLbl and SLbl.Parent then local ft = {}; if Cfg.HB.On then table.insert(ft, "HB") end; if Cfg.ESP.On then table.insert(ft, "ESP") end; if Cfg.HB.Wall then table.insert(ft, "WALL") end; local fs = #ft > 0 and table.concat(ft, "·") or "TẮT"; SLbl.Text = string.format("🇻🇳 %s | 🎯 %d | ⚡ %.0f FPS", fs, tc, fps); SLbl.TextColor3 = tc > 0 and VN.Vang or VN.ChuMo end
+end)
+table.insert(Conns, heartbeat)
+
+-- ═══════════ KILL SWITCH ═══════════
+_G._FlowKill = function()
+    for _, c in ipairs(Conns) do pcall(function() c:Disconnect() end) end; Conns = {}
+    for _, p in ipairs(Players:GetPlayers()) do if p ~= LP then FullCleanup(p) end end
+    if VR and VR.Parent then VR:Destroy() end
+    pcall(function() CoreGui:FindFirstChild("Flow_VN_v61"):Destroy() end)
+    WPN_CACHE = {}; ZoneCache = {}; ZoneStates = {}
+    print("🇻🇳 [FLOW v6.1] ✅ Đã dọn dẹp!")
+end
+
+print("═══════════════════════════════════════════════════")
+print("🇻🇳 FLOW v6.1 — HỒNG LONG VIỆT NAM 🐉")
+print("═══════════════════════════════════════════════════")
+print("✅ FIX: Weapon Detection (200+ vũ khí)")
+print("✅ FIX: Zone Transition → Enemy (ESP + HB)")
+print("✅ FIX: Hitbox Damage (luôn expand, CanQuery=true)")
+print("═══════════════════════════════════════════════════")
+print("★ Nhấn nút ★ để mở UI | Hotkey: RightCtrl / F6")
+print("═══════════════════════════════════════════════════")
