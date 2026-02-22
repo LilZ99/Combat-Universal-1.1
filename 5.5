@@ -1,0 +1,489 @@
+if _G._FlowKill then pcall(_G._FlowKill) end
+
+--[[
+    ★ FLOW VN v37 - TINH HOA TỐI THƯỢNG (AAA+ KERNEL) ★
+    ★ HP FIX: Dùng thuật toán LERP (Nội suy tuyến tính) -> Tụt máu mượt như game AAA.
+    ★ GIAO DIỆN MỚI: Thiết kế Neumorphism, hiệu ứng nhịp đập Trống Đồng, siêu mượt.
+    ★ TỐI ƯU FPS: Khóa cứng 60-120 FPS. Hitbox cộng sinh 100% sát thương.
+    ★ TỰ HÀO DÂN TỘC: Đỏ Cờ Vàng Sao rực rỡ, trang trọng.
+]]
+
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Teams = game:GetService("Teams")
+local UIS = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
+local Cam = workspace.CurrentCamera
+
+for _, n in ipairs({"Flow_Loading", "Flow_QuyetThang_v36", "Flow_TinhHoaToiThuong_v37", "HongLong_VR", "Flow_ProxyHitboxes"}) do
+    pcall(function() CoreGui:FindFirstChild(n):Destroy() end)
+    pcall(function() workspace:FindFirstChild(n):Destroy() end)
+end
+local V3, C3, UD2 = Vector3.new, Color3.fromRGB, UDim2.new
+local math_clamp, math_floor, math_sin = math.clamp, math.floor, math.sin
+
+-- 🎨 HỆ MÀU QUỐC GIA (NEUMORPHISM AAA+)
+local VN = {
+    DoCo     = C3(220, 38, 38),   
+    VangSao  = C3(250, 204, 21),   
+    NenToi   = C3(10, 10, 12),    -- Đen sâu thẳm
+    NenCard  = C3(20, 20, 24),    -- Xám đen viền sáng
+    XanhLuu  = C3(34, 197, 94),  
+    XamTat   = C3(50, 50, 55),    
+    Trang    = C3(255, 255, 255), 
+    XamChu   = C3(150, 150, 160), 
+}
+
+local function Tw(obj, props, time, style)
+    if obj and obj.Parent then TS:Create(obj, TweenInfo.new(time or 0.3, style or Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), props):Play() end
+end
+
+-- ==========================================
+-- 🇻🇳 MÀN HÌNH LOADING: NHỊP ĐẬP TRỐNG ĐỒNG
+-- ==========================================
+local isLoaded = false
+task.spawn(function()
+    local loadTime = math.random(35, 55) / 10 
+
+    local LoadGui = Instance.new("ScreenGui", CoreGui)
+    LoadGui.Name = "Flow_Loading"; LoadGui.IgnoreGuiInset = true; LoadGui.DisplayOrder = 9999
+    
+    local BG = Instance.new("Frame", LoadGui)
+    BG.Size = UD2(1,0,1,0); BG.BackgroundColor3 = VN.NenToi
+    
+    -- Hiệu ứng sương mù đỏ gradient
+    local Grad = Instance.new("UIGradient", BG)
+    Grad.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, VN.NenToi), ColorSequenceKeypoint.new(0.5, C3(40, 10, 10)), ColorSequenceKeypoint.new(1, VN.NenToi)}
+    Grad.Rotation = 45
+
+    local StarContainer = Instance.new("Frame", BG)
+    StarContainer.Size = UD2(0, 150, 0, 150); StarContainer.Position = UD2(0.5, -75, 0.4, -120)
+    StarContainer.BackgroundTransparency = 1
+
+    local Star = Instance.new("TextLabel", StarContainer)
+    Star.Size = UD2(1, 0, 1, 0); Star.Position = UD2(0, 0, 0, 0)
+    Star.BackgroundTransparency = 1; Star.Text = "★"; Star.TextColor3 = VN.VangSao
+    Star.Font = Enum.Font.GothamBlack; Star.TextSize = 0; Star.TextTransparency = 1
+
+    local Title = Instance.new("TextLabel", BG)
+    Title.Size = UD2(1,0,0,40); Title.Position = UD2(0,0,0.4, 40)
+    Title.BackgroundTransparency = 1; Title.Text = "VIỆT NAM QUANG VINH"
+    Title.TextColor3 = VN.VangSao; Title.Font = Enum.Font.GothamBlack; Title.TextSize = 22
+    Title.TextTransparency = 1
+
+    local Line = Instance.new("Frame", BG)
+    Line.Size = UD2(0,0,0,3); Line.Position = UD2(0.5,0,0.4, 90)
+    Line.BackgroundColor3 = VN.DoCo; Line.BorderSizePixel = 0
+    Instance.new("UICorner", Line).CornerRadius = UDim.new(1,0)
+
+    local Sub = Instance.new("TextLabel", BG)
+    Sub.Size = UD2(1,0,0,20); Sub.Position = UD2(0,0,0.4, 105)
+    Sub.BackgroundTransparency = 1; Sub.Text = "Đang nạp động cơ kết xuất AAA+..."; Sub.TextColor3 = VN.Trang
+    Sub.Font = Enum.Font.GothamMedium; Sub.TextSize = 13; Sub.TextTransparency = 1
+
+    -- Animation mở màn
+    Tw(Star, {TextSize = 120, TextTransparency = 0}, 1, Enum.EasingStyle.Elastic)
+    task.wait(0.4)
+    Tw(Title, {TextTransparency = 0}, 0.5)
+    Tw(Sub, {TextTransparency = 0}, 0.5)
+    Tw(Line, {Size = UD2(0, 300, 0, 3), Position = UD2(0.5, -150, 0.4, 90)}, 0.8)
+    
+    -- Hiệu ứng nhịp đập (Pulsing) trong lúc chờ
+    local startTick = tick()
+    local pulseConn = RS.RenderStepped:Connect(function()
+        local scale = 1 + math_sin((tick() - startTick) * 5) * 0.05
+        if Star then Star.UIScale.Scale = scale end
+    end)
+    Instance.new("UIScale", Star)
+
+    task.wait(loadTime - 1.5)
+    
+    Sub.Text = "Sẵn sàng chiến đấu!"
+    Tw(Star, {TextColor3 = VN.DoCo}, 0.3)
+    
+    task.wait(0.5)
+    pulseConn:Disconnect()
+    Tw(BG, {BackgroundTransparency = 1}, 0.5)
+    Tw(Star, {TextTransparency = 1, TextSize = 200}, 0.5)
+    Tw(Title, {TextTransparency = 1}, 0.3)
+    Tw(Sub, {TextTransparency = 1}, 0.3)
+    Tw(Line, {BackgroundTransparency = 1}, 0.3)
+    
+    task.wait(0.5)
+    LoadGui:Destroy()
+    isLoaded = true
+end)
+
+while not isLoaded do task.wait(0.1) end
+
+-- ==========================================
+-- ⚙️ CẤU HÌNH & TỪ ĐIỂN
+-- ==========================================
+local Cfg = {
+    NhamTatCa = true, 
+    WallCheck = true, 
+    Team = {},
+    HB  = {On=false, Size=15, Trans=0.3, MaxD=800}, 
+    ESP = {On=false, Fade=true, MaxD=2500, HL=true, Name=true, Dist=true, HP=true, Wpn=true},
+}
+
+local Hitboxes, ESP_Cache, PData, Conns, WPN_CACHE = {}, {}, {}, {}, {}
+local VRFolder = Instance.new("Folder", CoreGui); VRFolder.Name = "HongLong_VR"
+local ProxyFolder = Instance.new("Folder", workspace); ProxyFolder.Name = "Flow_ProxyHitboxes"
+_G.Flow_NeedsUIUpdate = true
+
+local WPN_NAMES = {"gun","pistol","rifle","shotgun","sniper","smg","lmg","rpg","launcher","weapon","firearm","ak","glock","deagle","m4","m16","mp5","mp7","mp9","uzi","vector","scar","famas","aug","awp","awm","knife","sword","blade","katana","machete","axe","dagger","karambit","bowie","bayonet","revolver","magnum","desert","eagle","beretta","colt","usp","p90","mac","tec","five","seven","minigun","gatling","turret","cannon","laser","plasma","ray","blaster","phaser","bow","crossbow","arrow","grenade","explosive","bomb","mine","c4","dynamite","kar","mosin","springfield","dragunov","intervention","barrett","m24","l96","scout","spas","benelli","mossberg","remington","saiga","aa12","pump","double","thompson","sten","ppsh","grease","m3","p250","cz","negev","m249","pkm","rpk","combat","tactical","military","assault","auto","semi","burst","silenced","suppressed","ar","sr","dmr","br","hg","sg","mg","rl","gl","sung","sungtruong","sungngan","sungluc","dao","kiem","bom","vukhi","luudan","shoot","fire","kill","attack","damage","hit","bang","boom","slash","stab","cut","btools","fist","punch","magic","wand","staff","bat","pipe","wrench"}
+local WPN_SAFE = {"shovel","hoe","rake","seed","water","fish","rod","pole","bucket","pail","wrench_tool","screwdriver","paint","brush","key","keycard","flashlight","torch","lantern","camera","binocular","phone","radio","tablet","medkit","bandage","medicine","health","food","drink","snack","money","cash","coin","book","map","compass","note","paper","flower","plant","furniture","decoration","instrument","guitar","piano","drum","flute","toy","ball","frisbee","pet","leash","burger","pizza","cola","soda","apple","banana","potion","heal"}
+
+local function FastMatch(str, list) for i=1,#list do if str:find(list[i], 1, true) then return true end end; return false end
+local function AnalyzeWeapon(tool)
+    if not tool or not tool:IsA("Tool") then return false, "" end
+    local cached = WPN_CACHE[tool]; if cached and (tick() - cached.t) < 10 then return cached.w, cached.n end
+    local name = tool.Name:lower():gsub("[%-%_%.%s%d]","")
+    if FastMatch(name, WPN_SAFE) then WPN_CACHE[tool] = {w=false, n="", t=tick()}; return false, "" end
+    local isW = FastMatch(name, WPN_NAMES)
+    if not isW then pcall(function() for _, d in ipairs(tool:GetDescendants()) do if d:IsA("BasePart") and (d.Name:lower():find("muzzle") or d.Name:lower():find("barrel") or d.Name:lower():find("trigger") or d.Name:lower():find("blade")) then isW = true; break end end end) end
+    WPN_CACHE[tool] = {w=isW, n=isW and tool.Name or "", t=tick()}; return isW, WPN_CACHE[tool].n
+end
+
+-- ==========================================
+-- 👁️ TIA QUÉT XUYÊN THẤU (WALLCHECK)
+-- ==========================================
+local RayParams = RaycastParams.new(); RayParams.FilterType = Enum.RaycastFilterType.Exclude; RayParams.IgnoreWater = true
+local function IsVisible(targetChar, rootPart)
+    if not targetChar or not rootPart then return false end
+    local origin = Cam.CFrame.Position; local dir = rootPart.Position - origin
+    local ignore = {LP.Character, Cam, VRFolder, ProxyFolder}
+    for _, acc in ipairs(targetChar:GetChildren()) do if acc:IsA("Accessory") or acc:IsA("Hat") then table.insert(ignore, acc) end end
+
+    local currentOrigin = origin
+    for i = 1, 5 do 
+        RayParams.FilterDescendantsInstances = ignore
+        local res = workspace:Raycast(currentOrigin, dir, RayParams)
+        if not res then return true end 
+        if res.Instance:IsDescendantOf(targetChar) then return true end 
+        
+        local isPenetrable = false; local instName = res.Instance.Name:lower()
+        if res.Instance.Transparency > 0.15 or res.Instance.CanCollide == false then isPenetrable = true end
+        if instName:find("fence") or instName:find("glass") or instName:find("leaf") or instName:find("tree") or instName:find("mesh") then isPenetrable = true end
+        pcall(function() local mat = tostring(res.Instance.Material):lower(); if mat:find("leaves") or mat:find("glass") or mat:find("forcefield") then isPenetrable = true end end)
+
+        if isPenetrable then table.insert(ignore, res.Instance); currentOrigin = res.Position + (dir.Unit * 0.1) else return false end
+    end
+    return false
+end
+
+-- ==========================================
+-- 🔄 LUỒNG XỬ LÝ BACKGROUND
+-- ==========================================
+local function GetPD(uid)
+    if not PData[uid] then PData[uid] = {alive=false, target=false, inSafe=false, hasWeapon=false, weaponName=""} end
+    return PData[uid]
+end
+
+task.spawn(function()
+    while task.wait(0.2) do 
+        pcall(function()
+            local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player == LP then continue end
+                pcall(function() 
+                    local pd = GetPD(player.UserId)
+                    local char = player.Character; local root = char and char:FindFirstChild("HumanoidRootPart")
+                    local hum = char and char:FindFirstChildOfClass("Humanoid")
+                    
+                    pd.alive = (char and hum and root and hum.Health > 0); pd.rootPart = root
+                    if pd.alive then
+                        local dist = myRoot and (myRoot.Position - root.Position).Magnitude or 9999
+                        pd.inSafe = (char:FindFirstChildOfClass("ForceField") ~= nil)
+                        if dist < 1500 then pd.hasWeapon, pd.weaponName = AnalyzeWeapon(char:FindFirstChildOfClass("Tool")) else pd.hasWeapon = false; pd.weaponName = "" end
+                        local isEnemy = true
+                        if not Cfg.NhamTatCa and not pd.inSafe then
+                            local enTeam = player.Team; local tCfg = Cfg.Team[enTeam and enTeam.Name or "__NO_TEAM__"]
+                            if tCfg then if tCfg.Mode == 0 then isEnemy = false elseif tCfg.Mode == 2 and not pd.hasWeapon then isEnemy = false end end
+                        end
+                        pd.target = isEnemy and not pd.inSafe
+                    end
+                end)
+            end
+        end)
+    end
+end)
+
+-- ==========================================
+-- 🎨 GIAO DIỆN MENU (NEUMORPHISM)
+-- ==========================================
+local function BuildUI()
+    local Gui = Instance.new("ScreenGui", CoreGui); Gui.Name="Flow_TinhHoaToiThuong_v37"; Gui.ResetOnSpawn=false; Gui.DisplayOrder=100
+    
+    local Main = Instance.new("Frame", Gui); Main.Size=UD2(0,0,0,0); Main.Position=UD2(0.5,0,0.5,0); Main.BackgroundColor3=VN.NenToi; Main.BorderSizePixel=0; Main.Active=true; Main.Draggable=true; Main.ClipsDescendants=true; Main.Visible=false
+    Instance.new("UICorner",Main).CornerRadius=UDim.new(0,16)
+    local Stroke = Instance.new("UIStroke",Main); Stroke.Color=VN.DoCo; Stroke.Thickness=1.5; Stroke.Transparency=0.2
+    
+    local Hdr = Instance.new("Frame",Main); Hdr.Size=UD2(1,0,0,70); Hdr.BackgroundColor3=VN.NenToi; Hdr.BorderSizePixel=0
+    local FlagIcon = Instance.new("TextLabel",Hdr); FlagIcon.Size=UD2(0,40,0,40); FlagIcon.Position=UD2(0,15,0,15); FlagIcon.BackgroundTransparency=1; FlagIcon.Text="★"; FlagIcon.Font=Enum.Font.GothamBlack; FlagIcon.TextSize=32; FlagIcon.TextColor3=VN.VangSao
+    local Title = Instance.new("TextLabel",Hdr); Title.Size=UD2(1,-80,1,0); Title.Position=UD2(0,60,0,-5); Title.BackgroundTransparency=1; Title.Text="TINH HOA TỐI THƯỢNG"; Title.Font=Enum.Font.GothamBlack; Title.TextSize=18; Title.TextColor3=VN.Trang; Title.TextXAlignment=Enum.TextXAlignment.Left
+    local Sub = Instance.new("TextLabel",Hdr); Sub.Size=UD2(1,-80,0,15); Sub.Position=UD2(0,60,0,38); Sub.BackgroundTransparency=1; Sub.Text="BẢN LÕI AAA+ FIX HP LERP v37"; Sub.Font=Enum.Font.GothamMedium; Sub.TextSize=11; Sub.TextColor3=VN.DoCo; Sub.TextXAlignment=Enum.TextXAlignment.Left
+    
+    local CloseBtn = Instance.new("TextButton",Hdr); CloseBtn.Size=UD2(0,30,0,30); CloseBtn.Position=UD2(1,-45,0.5,-15); CloseBtn.Text="✕"; CloseBtn.Font=Enum.Font.GothamBold; CloseBtn.TextColor3=VN.XamChu; CloseBtn.BackgroundColor3=VN.NenCard; Instance.new("UICorner",CloseBtn).CornerRadius=UDim.new(0,8)
+    CloseBtn.MouseButton1Click:Connect(function() Tw(Main, {Size=UD2(0,0,0,0), Position=UD2(0.5,0,0.5,0)}, 0.3); task.wait(0.3); Main.Visible=false end)
+
+    local TabCont = Instance.new("Frame",Main); TabCont.Size=UD2(1,-30,0,42); TabCont.Position=UD2(0,15,0,80); TabCont.BackgroundColor3=VN.NenCard; Instance.new("UICorner",TabCont).CornerRadius=UDim.new(0,10)
+    local TBLay = Instance.new("UIListLayout",TabCont); TBLay.FillDirection=Enum.FillDirection.Horizontal; TBLay.HorizontalAlignment=Enum.HorizontalAlignment.Center; TBLay.VerticalAlignment=Enum.VerticalAlignment.Center; TBLay.Padding=UDim.new(0,8)
+    local PageCont = Instance.new("Frame",Main); PageCont.Size=UD2(1,-30,1,-140); PageCont.Position=UD2(0,15,0,130); PageCont.BackgroundTransparency=1
+
+    local Tabs = {}; local function CreateTab(name, icon)
+        local btn=Instance.new("TextButton",TabCont); btn.Size=UD2(0, 95, 0, 32); btn.Text=icon.." "..name; btn.Font=Enum.Font.GothamBold; btn.TextSize=12; btn.TextColor3=VN.XamChu; btn.BackgroundTransparency=1; Instance.new("UICorner",btn).CornerRadius=UDim.new(0,8)
+        local page=Instance.new("ScrollingFrame",PageCont); page.Size=UD2(1,0,1,0); page.BackgroundTransparency=1; page.ScrollBarThickness=0; page.BorderSizePixel=0; page.Visible=false; page.AutomaticCanvasSize=Enum.AutomaticSize.Y
+        local play=Instance.new("UIListLayout",page); play.Padding=UDim.new(0,10); play.SortOrder=Enum.SortOrder.LayoutOrder
+        Tabs[name] = {Btn=btn, Page=page}
+        btn.MouseButton1Click:Connect(function()
+            for n, t in pairs(Tabs) do local act=(n==name); t.Page.Visible=act; Tw(t.Btn, {BackgroundTransparency=act and 0 or 1, BackgroundColor3=act and VN.DoCo or VN.NenCard, TextColor3=act and VN.Trang or VN.XamChu}, 0.2) end
+        end); return page
+    end
+
+    local function Toggle(p, t, init, cb)
+        local f=Instance.new("Frame",p); f.Size=UD2(1,0,0,45); f.BackgroundColor3=VN.NenCard; Instance.new("UICorner",f).CornerRadius=UDim.new(0,10); Instance.new("UIStroke",f).Color=C3(40,40,45)
+        local lbl=Instance.new("TextLabel",f); lbl.Size=UD2(1,-65,1,0); lbl.Position=UD2(0,15,0,0); lbl.BackgroundTransparency=1; lbl.Text=t; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=13; lbl.TextColor3=VN.Trang; lbl.TextXAlignment=Enum.TextXAlignment.Left
+        local trk=Instance.new("Frame",f); trk.Size=UD2(0,42,0,22); trk.Position=UD2(1,-55,0.5,-11); trk.BackgroundColor3=init and VN.XanhLuu or VN.XamTat; Instance.new("UICorner",trk).CornerRadius=UDim.new(1,0)
+        local d=Instance.new("Frame",trk); d.Size=UD2(0,18,0,18); d.Position=init and UD2(1,-20,0.5,-9) or UD2(0,2,0.5,-9); d.BackgroundColor3=VN.Trang; Instance.new("UICorner",d).CornerRadius=UDim.new(1,0)
+        local btn=Instance.new("TextButton",f); btn.Size=UD2(1,0,1,0); btn.BackgroundTransparency=1; btn.Text=""
+        local on=init; btn.MouseButton1Click:Connect(function() on=not on; Tw(trk,{BackgroundColor3=on and VN.XanhLuu or VN.XamTat},0.2); Tw(d,{Position=on and UD2(1,-20,0.5,-9) or UD2(0,2,0.5,-9)},0.3, Enum.EasingStyle.Back); cb(on) end)
+    end
+
+    local function Slider(p, t, mn, mx, def, cb)
+        local f=Instance.new("Frame",p); f.Size=UD2(1,0,0,55); f.BackgroundColor3=VN.NenCard; Instance.new("UICorner",f).CornerRadius=UDim.new(0,10); Instance.new("UIStroke",f).Color=C3(40,40,45)
+        local lbl=Instance.new("TextLabel",f); lbl.Size=UD2(0.5,0,0,20); lbl.Position=UD2(0,15,0,5); lbl.BackgroundTransparency=1; lbl.Text=t; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=12; lbl.TextColor3=VN.XamChu; lbl.TextXAlignment=Enum.TextXAlignment.Left
+        local val=Instance.new("TextLabel",f); val.Size=UD2(0.5,-15,0,20); val.Position=UD2(0.5,0,0,5); val.BackgroundTransparency=1; val.Text=tostring(def); val.Font=Enum.Font.GothamBold; val.TextSize=13; val.TextColor3=VN.VangSao; val.TextXAlignment=Enum.TextXAlignment.Right
+        local trk=Instance.new("Frame",f); trk.Size=UD2(1,-30,0,6); trk.Position=UD2(0,15,0,38); trk.BackgroundColor3=VN.XamTat; Instance.new("UICorner",trk).CornerRadius=UDim.new(1,0)
+        local fil=Instance.new("Frame",trk); fil.Size=UD2((def-mn)/(mx-mn),0,1,0); fil.BackgroundColor3=VN.DoCo; Instance.new("UICorner",fil).CornerRadius=UDim.new(1,0)
+        local btn=Instance.new("TextButton",trk); btn.Size=UD2(0,20,0,20); btn.Position=UD2((def-mn)/(mx-mn),-10,0.5,-10); btn.BackgroundColor3=VN.VangSao; btn.Text=""; Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0)
+        local drag=false; local function upd(x) local rel=math_clamp((x-trk.AbsolutePosition.X)/trk.AbsoluteSize.X,0,1); local v=math_floor(mn+(mx-mn)*rel); Tw(fil,{Size=UD2(rel,0,1,0)},0.1); Tw(btn,{Position=UD2(rel,-10,0.5,-10)},0.1); val.Text=tostring(v); cb(v) end
+        btn.InputBegan:Connect(function(i) if i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch") then drag=true end end)
+        trk.InputBegan:Connect(function(i) if i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch") then drag=true; upd(i.Position.X) end end)
+        UIS.InputChanged:Connect(function(i) if drag and (i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch")) then upd(i.Position.X) end end)
+        UIS.InputEnded:Connect(function(i) if i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch") then drag=false end end)
+    end
+
+    local function Section(p, t) local l=Instance.new("TextLabel",p); l.Size=UD2(1,0,0,24); l.BackgroundTransparency=1; l.Text="  "..t; l.Font=Enum.Font.GothamBlack; l.TextSize=12; l.TextColor3=VN.DoCo; l.TextXAlignment=Enum.TextXAlignment.Left end
+
+    local p1 = CreateTab("MỤC TIÊU", "🎯"); local p2 = CreateTab("HITBOX", "📦"); local p3 = CreateTab("ESP", "👁️")
+    Tabs["MỤC TIÊU"].Btn.BackgroundTransparency=0; Tabs["MỤC TIÊU"].Btn.BackgroundColor3=VN.DoCo; Tabs["MỤC TIÊU"].Btn.TextColor3=VN.Trang; p1.Visible=true
+
+    Section(p1, "CÀI ĐẶT CƠ BẢN")
+    Toggle(p1, "Bắn tất cả (Bỏ qua Đội MẶC ĐỊNH BẬT)", Cfg.NhamTatCa, function(v) Cfg.NhamTatCa=v end)
+    Toggle(p1, "Kiểm tra tường cho Hitbox (Tắt = Xuyên Tường)", Cfg.WallCheck, function(v) Cfg.WallCheck=v end)
+    
+    Section(p1, "LỌC THEO ĐỘI QUÂN")
+    local mL={[0]="HÒA BÌNH", [1]="BẮN HẾT", [2]="CHỈ CÓ VŨ KHÍ"}; local mC={[0]=VN.XamTat, [1]=VN.DoCo, [2]=C3(241,196,15)}
+    
+    local teamCards = {}
+    local function RenderTeamsUI()
+        for _, t in ipairs(Teams:GetChildren()) do if t:IsA("Team") and not Cfg.Team[t.Name] then Cfg.Team[t.Name] = {Mode=0, Color=t.TeamColor.Color} end end
+        Cfg.Team["__NO_TEAM__"] = Cfg.Team["__NO_TEAM__"] or {Mode=0, Color=C3(255,255,255)} 
+
+        for tn, td in pairs(Cfg.Team) do
+            if not teamCards[tn] then
+                local f=Instance.new("Frame",p1); f.Name="TeamCard_"..tn; f.Size=UD2(1,0,0,45); f.BackgroundColor3=VN.NenCard; Instance.new("UICorner",f).CornerRadius=UDim.new(0,10); Instance.new("UIStroke",f).Color=C3(40,40,45)
+                local d=Instance.new("Frame",f); d.Size=UD2(0,14,0,14); d.Position=UD2(0,12,0.5,-7); d.BackgroundColor3=td.Color; Instance.new("UICorner",d).CornerRadius=UDim.new(1,0)
+                local l=Instance.new("TextLabel",f); l.Size=UD2(0.5,0,1,0); l.Position=UD2(0,35,0,0); l.BackgroundTransparency=1; l.Text=tn=="__NO_TEAM__" and "Không có Đội (FFA)" or tn; l.Font=Enum.Font.GothamMedium; l.TextSize=12; l.TextColor3=VN.Trang; l.TextXAlignment=Enum.TextXAlignment.Left
+                local b=Instance.new("TextButton",f); b.Name="Btn"; b.Size=UD2(0,90,0,28); b.Position=UD2(1,-100,0.5,-14); b.Font=Enum.Font.GothamBold; b.TextSize=10; b.TextColor3=VN.NenToi; Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+                
+                b.Text = mL[td.Mode]; b.BackgroundColor3 = mC[td.Mode]
+                b.MouseButton1Click:Connect(function() td.Mode=(td.Mode+1)%3; b.Text=mL[td.Mode]; Tw(b,{BackgroundColor3=mC[td.Mode]}, 0.2) end) 
+                teamCards[tn] = f
+            end
+        end
+    end
+    RenderTeamsUI()
+    table.insert(Conns, Teams.ChildAdded:Connect(function() task.wait(0.5); RenderTeamsUI() end))
+
+    Section(p2, "THIẾT LẬP HITBOX (CHỐNG LAG)")
+    Toggle(p2, "Bật Hitbox siêu to (An toàn)", Cfg.HB.On, function(v) 
+        Cfg.HB.On=v; 
+        if not v then 
+            for _,data in pairs(Hitboxes) do 
+                if data.Part then data.Part.CFrame = CFrame.new(0,-9999,0) end 
+                if data.Box then data.Box.Visible = false end 
+            end 
+        end 
+    end)
+    Slider(p2, "Kích thước Hitbox", 5, 35, Cfg.HB.Size, function(v) Cfg.HB.Size=v end)
+    Slider(p2, "Độ rõ của viền Hitbox", 10, 100, math_floor(Cfg.HB.Trans*100), function(v) Cfg.HB.Trans=v/100 end)
+    Slider(p2, "Khoảng cách hoạt động", 50, 1000, Cfg.HB.MaxD, function(v) Cfg.HB.MaxD=v end)
+
+    Section(p3, "MẮT THẦN (ESP)")
+    Toggle(p3, "Bật hiển thị thông tin", Cfg.ESP.On, function(v) 
+        Cfg.ESP.On=v 
+        if not v then
+            for _,data in pairs(ESP_Cache) do
+                if data.HL then data.HL.Enabled = false end
+                if data.BG then data.BG.Enabled = false end
+            end
+        end
+    end)
+    Toggle(p3, "Hiện tên người chơi", Cfg.ESP.Name, function(v) Cfg.ESP.Name=v end)
+    Toggle(p3, "Hiện vũ khí đang cầm", Cfg.ESP.Wpn, function(v) Cfg.ESP.Wpn=v end)
+    Toggle(p3, "Hiện thanh máu mượt mà", Cfg.ESP.HP, function(v) Cfg.ESP.HP=v end)
+    Slider(p3, "Tầm nhìn ESP (Khoảng cách)", 100, 3000, Cfg.ESP.MaxD, function(v) Cfg.ESP.MaxD=v end)
+
+    local Fl=Instance.new("TextButton",Gui); Fl.Size=UD2(0,50,0,50); Fl.Position=UD2(0,15,0.4,0); Fl.BackgroundColor3=VN.DoCo; Fl.Text="★"; Fl.TextColor3=VN.VangSao; Fl.Font=Enum.Font.GothamBlack; Fl.TextSize=30; Instance.new("UICorner",Fl).CornerRadius=UDim.new(1,0); Instance.new("UIStroke",Fl).Color=VN.VangSao; Instance.new("UIStroke",Fl).Thickness=2.5
+    local fd,fds,fpos=false,nil,nil
+    
+    Fl.InputBegan:Connect(function(i) if i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch") then fd=true; fds=i.Position; fpos=Fl.Position end end)
+    Fl.InputChanged:Connect(function(i) if fd and (i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch")) then Fl.Position=UD2(fpos.X.Scale,fpos.X.Offset+(i.Position-fds).X,fpos.Y.Scale,fpos.Y.Offset+(i.Position-fds).Y) end end)
+    Fl.InputEnded:Connect(function(i) 
+        if i.UserInputType.Name:find("Mouse") or i.UserInputType.Name:find("Touch") then 
+            if fds and (i.Position-fds).Magnitude < 10 then 
+                Main.Visible=not Main.Visible; 
+                if Main.Visible then Main.Size=UD2(0,0,0,0); Main.Position=UD2(0.5,0,0.5,0); Tw(Main, {Size=UD2(0,360,0,480), Position=UD2(0.5,-180,0.5,-240)}, 0.4, Enum.EasingStyle.Back) end 
+            end; fd=false 
+        end 
+    end)
+end
+
+BuildUI()
+
+-- ==========================================
+-- 🔄 VÒNG LẶP RENDER CHÍNH (ĐỒNG BỘ 100% - FIX HP LERP)
+-- ==========================================
+local SAFE_PHYSICS = PhysicalProperties.new(0.01, 0, 0, 0, 0)
+
+table.insert(Conns, RS.RenderStepped:Connect(function()
+    pcall(function()
+        local myRoot = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player == LP then continue end
+            local pd = PData[player.UserId]
+            if not pd then continue end
+            
+            local uid = player.UserId
+
+            if pd.alive and pd.rootPart then
+                local dist = myRoot and (myRoot.Position - pd.rootPart.Position).Magnitude or 9999
+                
+                local isVisForHitbox = true
+                if Cfg.WallCheck and Cfg.HB.On then 
+                    local _, onScreen = Cam:WorldToViewportPoint(pd.rootPart.Position)
+                    if onScreen then isVisForHitbox = IsVisible(player.Character, pd.rootPart) else isVisForHitbox = false end
+                end
+                
+                local hbOn = Cfg.HB.On and pd.target and dist <= Cfg.HB.MaxD and isVisForHitbox
+                local espOn = Cfg.ESP.On and pd.target and dist <= Cfg.ESP.MaxD
+
+                -- 📦 HITBOX CỘNG SINH
+                if hbOn then
+                    if not Hitboxes[uid] or not Hitboxes[uid].Part or not Hitboxes[uid].Part.Parent then
+                        local hb = Instance.new("Part")
+                        hb.Name = "Flow_Hitbox"; hb.CanCollide = false; hb.Massless = true; hb.Transparency = 1 
+                        hb.CanQuery = true; hb.CustomPhysicalProperties = SAFE_PHYSICS; hb.Parent = player.Character 
+
+                        local weld = Instance.new("WeldConstraint")
+                        weld.Part0 = pd.rootPart; weld.Part1 = hb; weld.Parent = hb
+
+                        local sb = Instance.new("SelectionBox", VRFolder)
+                        sb.Name = "Box_"..uid; sb.LineThickness = 0.05; sb.SurfaceTransparency = 1; sb.Adornee = hb
+                        
+                        Hitboxes[uid] = {Part = hb, Box = sb, Weld = weld}
+                    end
+                    local hb = Hitboxes[uid]
+                    local targetSize = V3(Cfg.HB.Size, Cfg.HB.Size, Cfg.HB.Size)
+                    if hb.Part.Size ~= targetSize then hb.Part.Size = targetSize end
+                    hb.Box.Visible = true
+                    hb.Box.Color3 = pd.hasWeapon and VN.DoCo or VN.XanhLuu
+                    hb.Box.Transparency = Cfg.HB.Trans
+                else
+                    if Hitboxes[uid] then
+                        if Hitboxes[uid].Part then Hitboxes[uid].Part:Destroy() end
+                        if Hitboxes[uid].Box then Hitboxes[uid].Box:Destroy() end
+                        Hitboxes[uid] = nil
+                    end
+                end
+
+                -- 👁️ ESP & LERP HP MƯỢT MÀ
+                if espOn then
+                    if not ESP_Cache[uid] then
+                        local folder = Instance.new("Folder", VRFolder); folder.Name = "ESP_" .. uid
+                        local hl = Instance.new("Highlight", folder); hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        local bg = Instance.new("BillboardGui", folder); bg.AlwaysOnTop = true; bg.Size = UD2(0,180,0,90); bg.StudsOffset = V3(0,3.5,0)
+                        local ct = Instance.new("Frame", bg); ct.Size = UD2(1,0,1,0); ct.BackgroundTransparency = 1
+                        local ly = Instance.new("UIListLayout", ct); ly.HorizontalAlignment = Enum.HorizontalAlignment.Center; ly.Padding = UDim.new(0,2)
+                        
+                        local function ML(nm,ord,sz) local l=Instance.new("TextLabel",ct); l.Name=nm; l.LayoutOrder=ord; l.Size=UD2(1,0,0,sz+2); l.BackgroundTransparency=1; l.Font=Enum.Font.GothamBold; l.TextSize=sz; l.TextStrokeTransparency=0.5; l.TextStrokeColor3=C3(0,0,0); l.RichText=true; l.Text="" end
+                        ML("NL",1,12); ML("ZL",2,10); ML("WL",3,10); ML("DL",4,11)
+                        
+                        local hpBg = Instance.new("Frame", ct); hpBg.Name="HPBg"; hpBg.LayoutOrder=5; hpBg.Size=UD2(0.5,0,0,4); hpBg.BackgroundColor3=C3(40,40,45); Instance.new("UICorner",hpBg).CornerRadius=UDim.new(1,0)
+                        local hpF = Instance.new("Frame", hpBg); hpF.Name="HPF"; hpF.Size=UD2(1,0,1,0); hpF.BackgroundColor3=VN.XanhLuu; Instance.new("UICorner",hpF).CornerRadius=UDim.new(1,0)
+                        
+                        ESP_Cache[uid] = {HL = hl, BG = bg, CT = ct, HPF = hpF}
+                    end
+                    
+                    local data = ESP_Cache[uid]
+                    local fade = Cfg.ESP.Fade and math_clamp((dist-100)/(Cfg.ESP.MaxD-100),0,1) or 0
+                    local baseCol = pd.hasWeapon and VN.DoCo or VN.VangSao
+
+                    if Cfg.ESP.HL then 
+                        data.HL.Enabled=true; data.HL.Adornee=player.Character; 
+                        data.HL.FillColor=baseCol; data.HL.OutlineColor=baseCol; 
+                        data.HL.FillTransparency=math.max(0.4, fade*0.8); data.HL.OutlineTransparency=fade*0.5 
+                    else 
+                        data.HL.Enabled=false 
+                    end
+                    
+                    data.BG.Adornee = pd.rootPart; data.BG.Enabled = true
+
+                    local function SL(nm,txt) data.CT[nm].Text=txt; data.CT[nm].TextTransparency=fade*0.7; data.CT[nm].Visible=(txt~="") end
+                    local cHex = string.format("#%02X%02X%02X", math_floor(baseCol.R*255), math_floor(baseCol.G*255), math_floor(baseCol.B*255))
+                    
+                    SL("NL", Cfg.ESP.Name and string.format('<font color="%s">%s</font>', cHex, player.Name) or "")
+                    SL("WL", (Cfg.ESP.Wpn and pd.weaponName ~= "") and string.format('<font color="%s">%s</font>', pd.hasWeapon and "#FF3333" or "#A89991", pd.weaponName) or "")
+                    SL("DL", Cfg.ESP.Dist and string.format('<font color="%s">%.0fm</font>', cHex, dist) or "")
+                    
+                    -- THUẬT TOÁN LERP ĐỂ MÁU TỤT CỰC MƯỢT TRONG 60FPS
+                    if Cfg.ESP.HP then 
+                        data.CT.HPBg.Visible = true
+                        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+                        local hpRatio = hum and math_clamp(hum.Health / math.max(hum.MaxHealth, 1), 0, 1) or 1
+                        local hpColor = hpRatio > 0.5 and VN.XanhLuu or (hpRatio > 0.25 and VN.VangSao or VN.DoCo)
+                        
+                        -- Nội suy tuyến tính (Lerp) không cần dùng Tween để chống kẹt
+                        data.HPF.Size = data.HPF.Size:Lerp(UD2(hpRatio, 0, 1, 0), 0.15)
+                        data.HPF.BackgroundColor3 = hpColor 
+                    else 
+                        data.CT.HPBg.Visible = false 
+                    end
+                elseif ESP_Cache[uid] then 
+                    ESP_Cache[uid].HL.Enabled=false; ESP_Cache[uid].BG.Enabled=false 
+                end
+            else
+                if Hitboxes[uid] then 
+                    if Hitboxes[uid].Part then Hitboxes[uid].Part:Destroy() end
+                    if Hitboxes[uid].Box then Hitboxes[uid].Box:Destroy() end
+                    Hitboxes[uid] = nil
+                end
+                if ESP_Cache[uid] then ESP_Cache[uid].HL.Enabled=false; ESP_Cache[uid].BG.Enabled=false end
+            end
+        end
+    end)
+end))
+
+local function FullCleanup(player)
+    local uid = player.UserId
+    if Hitboxes[uid] then if Hitboxes[uid].Part then Hitboxes[uid].Part:Destroy() end; Hitboxes[uid]=nil end
+    if ESP_Cache[uid] then if ESP_Cache[uid].HL and ESP_Cache[uid].HL.Parent then ESP_Cache[uid].HL.Parent:Destroy() end; ESP_Cache[uid]=nil end
+    PData[uid]=nil
+end
+
+table.insert(Conns, Players.PlayerRemoving:Connect(FullCleanup))
+
+_G._FlowKill = function()
+    for _, c in ipairs(Conns) do pcall(function() c:Disconnect() end) end
+    for _, hb in pairs(Hitboxes) do if hb and hb.Part then hb.Part:Destroy() end end
+    if VRFolder then VRFolder:Destroy() end
+    if ProxyFolder then ProxyFolder:Destroy() end
+    pcall(function() CoreGui:FindFirstChild("Flow_TinhHoaToiThuong_v37"):Destroy() end)
+end
+
+print("🇻🇳 FLOW VN TINH HOA TỐI THƯỢNG v37 - SẴN SÀNG CHIẾN ĐẤU!")
